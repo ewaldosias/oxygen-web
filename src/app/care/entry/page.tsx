@@ -467,7 +467,10 @@ export default function CareEntry() {
           )}
 
           <FieldRow label="🌬 Souf (FR)" value={fr} setValue={setFr} unit="/min" placeholder="16"/>
-          <FieldRow label="⚖ Pwa" value={poids} setValue={setPoids} unit="kg" placeholder="65"/>
+          <FieldRow label="⚖ Pwa" value={poids} setValue={(v) => {
+  if (parseFloat(v) < 0) return
+  setPoids(v)
+}} unit="kg" placeholder="65"/>
         </div>
 
         {/* ── SECTION 3 : GLISEMI ── */}

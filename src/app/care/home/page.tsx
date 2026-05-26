@@ -142,6 +142,10 @@ export default function CareHome() {
   const [loading,      setLoading]      = useState(true)
   const [today,        setToday]        = useState('')
 
+  // ── Bouton urgence
+  const [urgenceStep,  setUrgenceStep]  = useState<'idle'|'confirm'|'sending'|'sent'>('idle')
+  const [urgenceError, setUrgenceError] = useState('')
+
   useEffect(() => {
     // Today's date in Creole
     const d = new Date()
@@ -235,6 +239,76 @@ export default function CareHome() {
         return `${days} jou de sa`
       })()
     : null
+
+  /* ── BOUTON URGENCE ── */
+  async function handleUrgence() {
+    setUrgenceStep('sending')
+    setUrgenceError('')
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { setUrgenceStep('idle'); return }
+
+      // 1. Récupérer la localisation GPS
+      let locationText = 'Pozisyon pa disponib'
+      let lat: number | null = null
+      let lng: number | null = null
+
+      try {
+        const pos = await new Promise<GeolocationPosition>((res, rej) =>
+          navigator.geolocation.getCurrentPosition(res, rej, { timeout: 5000 })
+        )
+        lat = pos.coords.latitude
+        lng = pos.coords.longitude
+        locationText = `https://maps.google.com/?q=${lat},${lng}`
+      } catch {
+        locationText = 'Pozisyon pa disponib'
+      }
+
+      // 2. Construire le message d'urgence
+      const taText = latestReading?.ta_sys && latestReading?.ta_dia
+        ? `Tansyon dènye: ${latestReading.ta_sys}/${latestReading.ta_dia} mmHg`
+        : ''
+      const message = encodeURIComponent(
+        `🚨 IJAN — ${firstName} bezwen èd kounye a!\n\n` +
+        `${taText}\n` +
+        `📍 Pozisyon: ${locationText}\n\n` +
+        `Voye pa OxyGen Care`
+      )
+
+      // 3. Fetch proches from care_family
+      const { data: proches } = await supabase
+        .from('care_family')
+        .select('proche_phone, proche_name')
+        .eq('patient_id', user.id)
+        .eq('active', true)
+
+      // 4. Log l'alerte dans Supabase
+      await supabase.from('care_alerts').insert({
+        user_id:    user.id,
+        alert_type: 'emergency_button',
+        latitude:   lat,
+        longitude:  lng,
+        created_at: new Date().toISOString(),
+      })
+
+      // 5. Ouvrir WhatsApp pour le premier proche
+      if (proches && proches.length > 0) {
+        const phone = proches[0].proche_phone?.replace(/\D/g, '')
+        window.open(`https://wa.me/${phone}?text=${message}`, '_blank')
+      } else {
+        // Pas de proche — ouvrir WhatsApp sans numéro
+        window.open(`https://wa.me/?text=${message}`, '_blank')
+      }
+
+      setUrgenceStep('sent')
+      setTimeout(() => setUrgenceStep('idle'), 5000)
+
+    } catch (err) {
+      console.error('urgence error:', err)
+      setUrgenceError('Erè — eseye ankò')
+      setUrgenceStep('idle')
+    }
+  }
 
   const TAB_BAR = [
     { label:'Akèy',       href:'/care/home',    active:true,  icon:<IconHome    size={22} color={TEAL}/> },
@@ -404,7 +478,48 @@ export default function CareHome() {
           </div>
         </div>
 
-        {/* ── PREMIUM CTA ── */}
+        {/* ── BOUTON URGENCE ── */}
+        <div style={{marginBottom:'12px'}}>
+          {urgenceStep === 'idle' && (
+            <button onClick={()=>setUrgenceStep('confirm')} style={{width:'100%',background:'linear-gradient(135deg,#7B0D1E 0%,#C0392B 100%)',color:'white',border:'none',borderRadius:'18px',padding:'18px',fontSize:'16px',fontWeight:700,cursor:'pointer',fontFamily:'DM Sans, sans-serif',boxShadow:'0 6px 20px rgba(192,57,43,.4)',display:'flex',alignItems:'center',justifyContent:'center',gap:'10px'}}>
+              <span style={{fontSize:'22px'}}>🆘</span> Bouton Ijans
+            </button>
+          )}
+
+          {urgenceStep === 'confirm' && (
+            <div style={{background:'white',borderRadius:'18px',border:'2px solid #C0392B',padding:'18px',boxShadow:'0 4px 16px rgba(192,57,43,.2)'}}>
+              <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'20px',fontWeight:500,color:'#C0392B',marginBottom:'6px',textAlign:'center'}}>Ou sèten ou bezwen èd ?</div>
+              <div style={{fontSize:'12px',color:'#6B7A90',textAlign:'center',marginBottom:'16px',lineHeight:1.6}}>Aksyon sa ap voye yon mesaj WhatsApp bay pwòch ou yo ak pozisyon ou.</div>
+              <div style={{display:'flex',gap:'10px'}}>
+                <button onClick={()=>setUrgenceStep('idle')} style={{flex:1,background:'rgba(27,42,74,.06)',color:NAVY,border:'1px solid rgba(27,42,74,.15)',borderRadius:'12px',padding:'13px',fontSize:'13px',fontWeight:600,cursor:'pointer',fontFamily:'DM Sans, sans-serif'}}>
+                  Anile
+                </button>
+                <button onClick={handleUrgence} style={{flex:2,background:'#C0392B',color:'white',border:'none',borderRadius:'12px',padding:'13px',fontSize:'13px',fontWeight:700,cursor:'pointer',fontFamily:'DM Sans, sans-serif',boxShadow:'0 4px 12px rgba(192,57,43,.3)'}}>
+                  🆘 Wi — Voye alèt
+                </button>
+              </div>
+            </div>
+          )}
+
+          {urgenceStep === 'sending' && (
+            <div style={{background:'rgba(192,57,43,.08)',border:'1px solid rgba(192,57,43,.2)',borderRadius:'18px',padding:'18px',textAlign:'center'}}>
+              <div style={{fontSize:'24px',marginBottom:'8px'}}>📡</div>
+              <div style={{fontSize:'14px',fontWeight:600,color:'#C0392B'}}>N ap voye alèt la...</div>
+            </div>
+          )}
+
+          {urgenceStep === 'sent' && (
+            <div style={{background:'rgba(26,138,74,.08)',border:'1px solid rgba(26,138,74,.2)',borderRadius:'18px',padding:'18px',textAlign:'center'}}>
+              <div style={{fontSize:'24px',marginBottom:'8px'}}>✅</div>
+              <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'18px',fontWeight:500,color:'#1A8A4A',marginBottom:'4px'}}>Alèt voye !</div>
+              <div style={{fontSize:'12px',color:'#6B7A90'}}>Pwòch ou yo resevwa yon mesaj WhatsApp</div>
+            </div>
+          )}
+
+          {urgenceError && (
+            <div style={{fontSize:'12px',color:'#C0392B',textAlign:'center',marginTop:'8px'}}>{urgenceError}</div>
+          )}
+        </div>
         <div className="c4" style={{background:`linear-gradient(135deg,#8C6B00 0%,${GOLD} 100%)`,borderRadius:'18px',padding:'16px',boxShadow:'0 4px 16px rgba(212,168,67,.3)'}}>
           <div style={{display:'flex',alignItems:'center',gap:'12px'}}>
             <IconPremium size={32}/>
