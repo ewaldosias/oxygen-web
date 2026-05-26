@@ -72,20 +72,46 @@ function getTaStatus(sys: number, dia: number): {color:string;label:string;advic
   if(sys>=180||dia>=120) return {color:'#7B0D1E',label:'🚨 Kriz',              advice:'IJAN — rele yon doktè oswa yon lòt pwofesyonèl sante kounye a'}
   if(sys>=160||dia>=110) return {color:'#C0392B',label:'🔴 Tansyon Wo Anpil', advice:'Stage 2 HTA — Wè doktè trè vit'}
   if(sys>=140||dia>=100) return {color:'#E07B2A',label:'🟠 Tansyon Limit',    advice:'Stage 1 HTA — Swiv avèk doktè ou'}
-  if(sys>=130||dia>=90)  return {color:'#E0A82A',label:'🟡 Yon ti jan wo',    advice:'Tansyon yon ti jan wo — kontinye swiv'}
+  if(sys>=130||dia>=90)  return {color:'#E0A82A',label:'🟡 Wo Yon Ti Jan',    advice:'Tansyon yon ti jan wo — kontinye swiv'}
   if(sys>=100&&dia>=65)  return {color:'#1A8A4A',label:'✓ Nòmal',             advice:'Bon travay — kontinye konsa'}
-  if(sys>=90 ||dia>=60)  return {color:'#3AA876',label:'🔵 Ba Nòmal',         advice:'Tansyon yon ti ba — verifye si ou santi malèz'}
+  if(sys>=90 ||dia>=60)  return {color:'#3AA876',label:'🔵 Ba Nòmal',          advice:'Tansyon yon ti ba — verifye si ou santi malèz'}
   if(sys>=70)            return {color:'#C0392B',label:'🔴 Ipotansyon',        advice:'Tansyon ba anpil — chita, rele doktè'}
   return                        {color:'#7B0D1E',label:'🚨 Kriz Ipotansyon',   advice:'IJAN — rele yon doktè oswa yon lòt pwofesyonèl sante kounye a'}
 }
 
-const SYMPTOMS = ['Tèt fè mal','Vizyon flou','Souf wo','Vètij','Fèbles','Nause','Doulè nan kòf','Anyen']
-const EYE_SYMPTOMS = ['Vizyon flou','Doub vizyon','Doulè nan je','Wouj nan je','Gratèl je','Wonn limyè','Larèm ale','Mòch volant']
+const FIELD_LABELS: Record<string,string> = {
+  ta_sys:            'Tansyon Sistòl',
+  ta_dia:            'Tansyon Dyastòl',
+  fc:                'Batman kè',
+  fr:                'Souf (FR)',
+  temperature:       'Tanperati',
+  spo2:              'SpO2',
+  poids:             'Pwa',
+  glycemie:          'Glisemi / Sik',
+  glycemie_type:     'Kontèks Glisemi',
+  hba1c:             'HbA1c',
+  creatinine:        'Kreyatinin',
+  cholesterol_total: 'Kolestewòl total',
+  hdl:               'HDL',
+  ldl:               'LDL',
+  triglycerides:     'Trigliserid',
+  hemoglobine:       'Emoglobin',
+  hematocrite:       'Ematokrit',
+  globules_blancs:   'Globil blan',
+  plaquettes:        'Plakèt',
+  tsh:               'TSH',
+  t4_libre:          'T4 lib',
+  result_date:       'Dat egzamen',
+  lab_name:          'Laboratwa',
+}
+
+const SYMPTOMS = ['Tèt fè mal','Vizyon flou','Souf wo','Vètij','Feblès','Noze','Doulè estoma','Anyen']
+const EYE_SYMPTOMS = ['Vizyon flou','Doub vizyon','Doulè nan je','Je wouj','Je grate','Wonn limyè','Je ap fè dlo','Mouch volan']
 
 const OPHTA_RED_ALERTS = [
-  { key:'perte_vision_soudaine',      label:'🚨 Pèt vizyon sibit', desc:'Ou pa wè yon sèl kote oswa toupatou — IJAN' },
-  { key:'flashs_mouches_volantes',    label:'🚨 Flash + Mòch volant', desc:'Aparisyon brid sou kou — IJAN' },
-  { key:'douleur_vision_cephalees',   label:'🚨 Doulè + Tèt fè mal fò', desc:'Vizyon trouble ak doulè entans — IJAN' },
+  { key:'perte_vision_soudaine',      label:'🚨 Pèt vizyon sibit',        desc:'Ou pa wè yon sèl kote oswa toupatou — IJAN' },
+  { key:'flashs_mouches_volantes',    label:'🚨 Flash + Mouch volan',      desc:'Aparisyon brid sou kou — IJAN' },
+  { key:'douleur_vision_cephalees',   label:'🚨 Gwo tèt fè mal + Vizyon trouble + Doulè', desc:'Doulè entans — IJAN' },
 ]
 
 export default function CareEntry() {
@@ -126,7 +152,7 @@ export default function CareEntry() {
   const [edema,     setEdema]     = useState<boolean|null>(null)
 
   // ── Spécialité (hardcodé pour démo — sera lu depuis Supabase)
-  const specialty = 'medecine_interne' // TODO: lire depuis care_profiles
+  const specialty : string = 'medecine_interne' // TODO: lire depuis care_profiles
 
   // ── Scan
   const [scanning,     setScanning]     = useState(false)
@@ -223,10 +249,66 @@ export default function CareEntry() {
   /* ── SAVE ── */
   async function handleSave() {
     setSaving(true)
-    // TODO: sauvegarder dans vital_signs_readings + lab_results
-    await new Promise(r => setTimeout(r, 1000))
-    setSaving(false); setSaved(true)
-    setTimeout(() => router.push('/care/home'), 1400)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.push('/care/login'); return }
+
+      // 1. Signes vitaux
+      const vitals: Record<string,any> = {
+        user_id:     user.id,
+        recorded_at: new Date().toISOString(),
+        entry_mode:  'manual',
+      }
+      if (taSys && taDia && !liveError) {
+        vitals.ta_sys     = toMmHg(taSys)
+        vitals.ta_dia     = toMmHg(taDia)
+        vitals.ta_context = 'repos'
+      }
+      if (fc)    { vitals.fc = parseInt(fc); vitals.fc_context = fcCtx }
+      if (fr)      vitals.fr           = parseInt(fr)
+      if (temp)  { vitals.temperature  = parseFloat(temp); vitals.temperature_site = tempSite }
+      if (spo2)    vitals.spo2         = parseInt(spo2)
+      if (poids)   vitals.poids        = parseFloat(poids)
+      if (gly)   { vitals.glycemie     = parseInt(gly); vitals.glycemie_type = glyType }
+      if (symptoms.length > 0) vitals.symptoms = symptoms
+
+      const { error: vErr } = await supabase
+        .from('vital_signs_readings')
+        .insert(vitals)
+      if (vErr) console.error('vitals error:', vErr)
+
+      // 2. Labo si au moins un champ rempli
+      const hasLab = hba1c || creat || chol || hdl || ldl || tg || hemo
+      if (hasLab) {
+        const labs: Record<string,any> = {
+          user_id:     user.id,
+          result_date: labDate || new Date().toISOString().split('T')[0],
+          entry_mode:  'manual',
+        }
+        if (hba1c) labs.hba1c             = parseFloat(hba1c)
+        if (creat) labs.creatinine        = parseFloat(creat)
+        if (chol)  labs.cholesterol_total = parseFloat(chol)
+        if (hdl)   labs.hdl               = parseFloat(hdl)
+        if (ldl)   labs.ldl               = parseFloat(ldl)
+        if (tg)    labs.triglycerides     = parseInt(tg)
+        if (hemo)  labs.hemoglobine       = parseFloat(hemo)
+
+        const { error: lErr } = await supabase
+          .from('lab_results')
+          .insert(labs)
+        if (lErr) console.error('labs error:', lErr)
+      }
+
+      setSaved(true)
+      setTimeout(() => router.push('/care/home'), 1400)
+
+    } catch (err) {
+      console.error('handleSave error:', err)
+      setSaved(true)
+      setTimeout(() => router.push('/care/home'), 1400)
+    } finally {
+      setSaving(false)
+    }
   }
 
   const canSave = (taSys && taDia && !liveError) || gly || spo2 || temp
@@ -468,7 +550,7 @@ export default function CareEntry() {
         {/* ── SECTION 6 : OPHTALMOLOGIE ── */}
         {(specialty==='ophtalmologie') && (
           <div className="sec" style={{background:'white',borderRadius:'18px',border:'1px solid rgba(27,42,74,.08)',padding:'16px'}}>
-            <div style={{fontSize:'10px',fontWeight:700,letterSpacing:'1.5px',color:'#6B7A90',textTransform:'uppercase',marginBottom:'10px'}}>👁️ Senpòm Je</div>
+            <div style={{fontSize:'10px',fontWeight:700,letterSpacing:'1.5px',color:'#6B7A90',textTransform:'uppercase',marginBottom:'10px'}}>👁️ Sentom Je</div>
 
             {/* Red alerts first */}
             <div style={{marginBottom:'14px'}}>
@@ -482,7 +564,7 @@ export default function CareEntry() {
             </div>
 
             {/* Symptômes yeux */}
-            <div style={{fontSize:'11px',fontWeight:700,color:'#6B7A90',marginBottom:'8px',textTransform:'uppercase',letterSpacing:'.5px'}}>Senpòm ou santi jodi a</div>
+            <div style={{fontSize:'11px',fontWeight:700,color:'#6B7A90',marginBottom:'8px',textTransform:'uppercase',letterSpacing:'.5px'}}>Sentom ou santi jodi a</div>
             <div style={{display:'flex',flexWrap:'wrap',gap:'6px'}}>
               {EYE_SYMPTOMS.map(s=>(
                 <button key={s} className="chip" onClick={()=>setEyeSympts(prev=>prev.includes(s)?prev.filter(x=>x!==s):[...prev,s])} style={{background:eyeSympts.includes(s)?'rgba(10,122,106,.1)':'#F0F4F9',border:`1.5px solid ${eyeSympts.includes(s)?TEAL:'rgba(27,42,74,.1)'}`,borderRadius:'20px',padding:'6px 12px',fontSize:'11px',fontWeight:eyeSympts.includes(s)?700:500,color:eyeSympts.includes(s)?TEAL:'#6B7A90',cursor:'pointer',fontFamily:'DM Sans, sans-serif'}}>
@@ -495,7 +577,7 @@ export default function CareEntry() {
 
         {/* ── SECTION 7 : SENPÒM GENERAUX ── */}
         <div className="sec" style={{background:'white',borderRadius:'18px',border:'1px solid rgba(27,42,74,.08)',padding:'16px'}}>
-          <div style={{fontSize:'10px',fontWeight:700,letterSpacing:'1.5px',color:'#6B7A90',textTransform:'uppercase',marginBottom:'10px'}}>Senpòm Jeneral</div>
+          <div style={{fontSize:'10px',fontWeight:700,letterSpacing:'1.5px',color:'#6B7A90',textTransform:'uppercase',marginBottom:'10px'}}>Sentom Jeneral</div>
           <div style={{display:'flex',flexWrap:'wrap',gap:'8px'}}>
             {SYMPTOMS.map(s=>(
               <button key={s} className="chip" onClick={()=>{
@@ -555,7 +637,7 @@ export default function CareEntry() {
                 <div style={{background:'#F0F4F9',borderRadius:'14px',padding:'14px',marginBottom:'20px'}}>
                   {Object.entries(scanResult.fields).map(([k,v])=>(
                     <div key={k} style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:'1px solid rgba(27,42,74,.06)',fontSize:'13px'}}>
-                      <span style={{color:'#6B7A90',fontWeight:600}}>{k.replace(/_/g,' ')}</span>
+                      <span style={{color:'#6B7A90',fontWeight:600}}>{FIELD_LABELS[k]||k}</span>
                       <span style={{fontFamily:'DM Mono, monospace',fontWeight:700,color:NAVY}}>{String(v)}</span>
                     </div>
                   ))}

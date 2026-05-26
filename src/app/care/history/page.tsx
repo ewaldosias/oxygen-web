@@ -2,6 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 type Period = '7j' | '30j' | '3m'
 type View   = 'ta' | 'gly'
@@ -10,7 +16,7 @@ const TEAL  = '#0A7A6A'
 const NAVY  = '#1B2A4A'
 const GOLD  = '#D4A843'
 
-/* ── DEMO DATA ── */
+/* ── TYPES ── */
 interface Reading {
   date:    string
   day:     string
@@ -21,15 +27,21 @@ interface Reading {
   missing: boolean
 }
 
-const DEMO_7J: Reading[] = [
-  { date:'Len 10 me',  day:'Len', taSys:138, taDia:88,  gly:112, glyType:'fasting',   missing:false },
-  { date:'Ma 11 me',   day:'Ma',  taSys:142, taDia:91,  gly:null,glyType:null,         missing:false },
-  { date:'Mè 12 me',   day:'Mè',  taSys:null,taDia:null,gly:null,glyType:null,         missing:true  },
-  { date:'Je 13 me',   day:'Je',  taSys:135, taDia:85,  gly:98,  glyType:'fasting',   missing:false },
-  { date:'Van 14 me',  day:'Van', taSys:148, taDia:92,  gly:108, glyType:'fasting',   missing:false },
-  { date:'Sam 15 me',  day:'Sam', taSys:152, taDia:95,  gly:142, glyType:'post_meal', missing:false },
-  { date:'Dim 16 me',  day:'Dim', taSys:145, taDia:90,  gly:118, glyType:'fasting',   missing:false },
-]
+const DAYS_HT = ['Dim','Len','Ma','Mè','Je','Van','Sam']
+
+function formatReading(r: any): Reading {
+  const d = new Date(r.recorded_at)
+  const months = ['jan','fev','mas','avr','me','jen','jiy','out','sep','okt','nov','des']
+  return {
+    date:    `${DAYS_HT[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]}`,
+    day:     DAYS_HT[d.getDay()],
+    taSys:   r.ta_sys || null,
+    taDia:   r.ta_dia || null,
+    gly:     r.glycemie || null,
+    glyType: r.glycemie_type || null,
+    missing: false,
+  }
+}
 
 function getStats(data: Reading[], view: View) {
   const vals = view === 'ta'
@@ -39,18 +51,18 @@ function getStats(data: Reading[], view: View) {
   const avg = Math.round(vals.reduce((a,b)=>a+b,0)/vals.length)
   const min = Math.min(...vals)
   const max = Math.max(...vals)
-  const target = view==='ta' ? 140 : 130
+  const target = view==='ta' ? 130 : 130
   const inTarget = Math.round((vals.filter(v=>v<target).length/vals.length)*100)
   return { avg, min, max, inTarget }
 }
 
 function taStatus(sys:number, dia:number):{color:string;label:string} {
-  if (sys>=180||dia>=120) return { color:'#7B0D1E', label:'Kriz'     }
-  if (sys>=140||dia>=90)  return { color:'#C0392B', label:'Wo anpil' }
-  if (sys>=130||dia>=80)  return { color:'#E07B2A', label:'Limit'    }
-  if (sys>=120)           return { color:'#E0A82A', label:'Wo yon ti kras' }
-  if (sys>=90)            return { color:'#1A8A4A', label:'Nòmal'    }
-  return                         { color:'#C0392B', label:'Ba'       }
+  if (sys>=180||dia>=120) return { color:'#7B0D1E', label:'Kriz'          }
+  if (sys>=160||dia>=110) return { color:'#C0392B', label:'Wo anpil'      }
+  if (sys>=140||dia>=100) return { color:'#E07B2A', label:'Limit'         }
+  if (sys>=130||dia>=90)  return { color:'#E0A82A', label:'Yon ti jan wo' }
+  if (sys>=100&&dia>=65)  return { color:'#1A8A4A', label:'Nòmal'         }
+  return                         { color:'#3AA876', label:'Ba Nòmal'      }
 }
 
 /* ── MOLECULE CANVAS ── */
@@ -169,17 +181,46 @@ export default function CareHistory() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   useMolCanvas(canvasRef)
 
-  const [period, setPeriod] = useState<Period>('7j')
-  const [view,   setView]   = useState<View>('ta')
+  const [period,  setPeriod]  = useState<Period>('7j')
+  const [view,    setView]    = useState<View>('ta')
+  const [data,    setData]    = useState<Reading[]>([])
+  const [loading, setLoading] = useState(true)
+  const [totalDays, setTotalDays] = useState(0)
 
-  const data  = DEMO_7J  // TODO: fetch from Supabase based on period
-  const stats = getStats(data, view)
+  useEffect(() => { loadData() }, [period])
 
-  // HbA1c estimated (ADAG formula) — needs 14+ days
-  const avgGly   = data.filter(d=>d.gly).map(d=>d.gly!)
+  async function loadData() {
+    setLoading(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const days = period === '7j' ? 7 : period === '30j' ? 30 : 90
+      const from = new Date(); from.setDate(from.getDate() - days)
+
+      const { data: readings } = await supabase
+        .from('vital_signs_readings')
+        .select('ta_sys, ta_dia, glycemie, glycemie_type, recorded_at')
+        .eq('user_id', user.id)
+        .gte('recorded_at', from.toISOString())
+        .order('recorded_at', { ascending: true })
+
+      if (readings) {
+        setData(readings.map(formatReading))
+        setTotalDays(readings.length)
+      }
+    } catch (err) {
+      console.error('history loadData error:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const stats      = getStats(data, view)
+  const avgGly     = data.filter(d=>d.gly).map(d=>d.gly!)
   const avgGlyMean = avgGly.length ? avgGly.reduce((a,b)=>a+b,0)/avgGly.length : null
-  const hba1c    = avgGlyMean ? ((avgGlyMean+46.7)/28.7).toFixed(1) : null
-  const has90d   = false  // TODO: check if 90+ days of data
+  const hba1c      = avgGlyMean && totalDays >= 14 ? ((avgGlyMean+46.7)/28.7).toFixed(1) : null
+  const has90d     = totalDays >= 90
 
   return (
     <div style={{minHeight:'100vh',background:'#F0F4F9',fontFamily:'DM Sans, sans-serif',paddingBottom:'100px'}}>

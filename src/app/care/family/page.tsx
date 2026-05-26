@@ -2,6 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 const TEAL = '#0A7A6A'
 const NAVY = '#1B2A4A'
@@ -30,7 +36,7 @@ function useMolCanvas(ref: React.RefObject<HTMLCanvasElement | null>) {
   },[ref])
 }
 
-/* ── DEMO DATA ── */
+/* ── TYPES ── */
 interface Proche {
   id: string
   name: string
@@ -49,42 +55,15 @@ interface FamilyMember {
   name: string
   oxcId: string
   relationship: string
-  taSys: number
-  taDia: number
+  taSys: number | null
+  taDia: number | null
   taStatus: 'ok'|'warn'|'alert'
-  gly: number
+  gly: number | null
   glyStatus: 'ok'|'warn'
   lastEntry: string
   streak: number
   missingToday: boolean
 }
-
-const MY_PROCHES: Proche[] = [
-  {
-    id:'1', name:'Josette Pierre', relationship:'Fi', location:'Miami, USA',
-    accessType:'app', active:true,
-    notifyRed:true, notifyNoReading:true, notifyWeekly:true,
-    lastAlert:'Alèt voye mèkredi — chif pa antre'
-  },
-  {
-    id:'2', name:'Marc Pierre', relationship:'Pitit gason', location:'Pétion-Ville',
-    accessType:'whatsapp', active:true,
-    notifyRed:true, notifyNoReading:true, notifyWeekly:false,
-  },
-]
-
-const I_MONITOR: FamilyMember[] = [
-  {
-    id:'3', name:'Jean-Pierre Osias', oxcId:'OXC-0000412',
-    relationship:'Papa', taSys:162, taDia:98, taStatus:'alert',
-    gly:145, glyStatus:'warn', lastEntry:'Yè 08h30', streak:22, missingToday:false
-  },
-  {
-    id:'4', name:'Rachilde Osias', oxcId:'OXC-0000413',
-    relationship:'Manman', taSys:128, taDia:78, taStatus:'ok',
-    gly:104, glyStatus:'ok', lastEntry:'Jodi a 07h15', streak:45, missingToday:false
-  },
-]
 
 const statusColor: Record<string,string> = { ok:'#1A8A4A', warn:'#E07B2A', alert:'#C0392B' }
 const statusLabel: Record<string,string>  = { ok:'Nòmal', warn:'Limit', alert:'Wo anpil' }
@@ -93,18 +72,136 @@ export default function CareFamily() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   useMolCanvas(canvasRef)
 
-  const [tab, setTab]           = useState<'monitor'|'myproches'>('monitor')
-  const [showInvite, setShowInvite] = useState(false)
+  const [tab,         setTab]         = useState<'monitor'|'myproches'>('monitor')
+  const [showInvite,  setShowInvite]  = useState(false)
   const [invitePhone, setInvitePhone] = useState('')
-  const [inviteName, setInviteName]   = useState('')
-  const [inviteRel, setInviteRel]     = useState('')
-  const [inviteSent, setInviteSent]   = useState(false)
+  const [inviteName,  setInviteName]  = useState('')
+  const [inviteRel,   setInviteRel]   = useState('')
+  const [inviteSent,  setInviteSent]  = useState(false)
+  const [myProches,   setMyProches]   = useState<Proche[]>([])
+  const [iMonitor,    setIMonitor]    = useState<FamilyMember[]>([])
+  const [loading,     setLoading]     = useState(true)
+  const [userName,    setUserName]    = useState('')
+
+  useEffect(() => { loadData() }, [])
+
+  async function loadData() {
+    setLoading(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      // Fetch user name
+      const { data: userData } = await supabase
+        .from('users')
+        .select('first_name')
+        .eq('id', user.id)
+        .maybeSingle()
+      if (userData?.first_name) setUserName(userData.first_name)
+
+      // Fetch proches who have access to MY data
+      const { data: proches } = await supabase
+        .from('care_family')
+        .select('*')
+        .eq('patient_id', user.id)
+
+      if (proches) {
+        setMyProches(proches.map((p: any) => ({
+          id:              p.id,
+          name:            p.proche_name || 'Pwòch',
+          relationship:    p.relationship || 'Fanmi',
+          location:        p.location || 'Ayiti',
+          accessType:      p.access_type || 'whatsapp',
+          active:          p.active ?? true,
+          notifyRed:       p.notify_red ?? true,
+          notifyNoReading: p.notify_no_reading ?? true,
+          notifyWeekly:    p.notify_weekly ?? false,
+          lastAlert:       p.last_alert_sent,
+        })))
+      }
+
+      // Fetch people I monitor (I am the proche)
+      const { data: monitored } = await supabase
+        .from('care_family')
+        .select(`
+          id, relationship,
+          patient:patient_id (
+            id, first_name, oxc_id,
+            vital_signs_readings (
+              ta_sys, ta_dia, glycemie, recorded_at
+            )
+          )
+        `)
+        .eq('proche_user_id', user.id)
+        .eq('active', true)
+
+      if (monitored) {
+        const members: FamilyMember[] = monitored
+          .filter((m: any) => m.patient)
+          .map((m: any) => {
+            const p = m.patient
+            const readings = p.vital_signs_readings || []
+            const latest = readings[0]
+            const taS = latest?.ta_sys && latest?.ta_dia
+              ? (latest.ta_sys >= 160 ? 'alert' : latest.ta_sys >= 130 ? 'warn' : 'ok')
+              : 'ok'
+            return {
+              id:           m.id,
+              name:         p.first_name || 'Pasyan',
+              oxcId:        p.oxc_id || '—',
+              relationship: m.relationship || 'Fanmi',
+              taSys:        latest?.ta_sys || null,
+              taDia:        latest?.ta_dia || null,
+              taStatus:     taS as 'ok'|'warn'|'alert',
+              gly:          latest?.glycemie || null,
+              glyStatus:    latest?.glycemie && latest.glycemie > 180 ? 'warn' : 'ok',
+              lastEntry:    latest?.recorded_at
+                ? new Date(latest.recorded_at).toLocaleDateString('fr-HT')
+                : 'Pako antre',
+              streak:       readings.length,
+              missingToday: !latest || new Date(latest.recorded_at).toDateString() !== new Date().toDateString(),
+            }
+          })
+        setIMonitor(members)
+      }
+
+    } catch (err) {
+      console.error('family loadData error:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   async function handleInvite() {
-    if (!invitePhone||!inviteName) return
-    await new Promise(r=>setTimeout(r,800))
-    setInviteSent(true)
-    setTimeout(()=>{ setShowInvite(false); setInviteSent(false); setInvitePhone(''); setInviteName(''); setInviteRel('') }, 2000)
+    if (!invitePhone || !inviteName) return
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      await supabase.from('care_family').insert({
+        patient_id:      user.id,
+        proche_name:     inviteName,
+        relationship:    inviteRel || 'Fanmi',
+        proche_phone:    invitePhone,
+        access_type:     'whatsapp',
+        active:          true,
+        notify_red:      true,
+        notify_no_reading: true,
+        notify_weekly:   false,
+        invite_sent_at:  new Date().toISOString(),
+      })
+
+      setInviteSent(true)
+      setTimeout(() => {
+        setShowInvite(false); setInviteSent(false)
+        setInvitePhone(''); setInviteName(''); setInviteRel('')
+        loadData()
+      }, 2000)
+    } catch (err) {
+      console.error('handleInvite error:', err)
+      setInviteSent(true)
+      setTimeout(() => { setShowInvite(false); setInviteSent(false) }, 2000)
+    }
   }
 
   return (
@@ -137,7 +234,7 @@ export default function CareFamily() {
             <div style={{flex:1}}>
               <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'11px',fontWeight:400,color:'rgba(255,255,255,0.5)',letterSpacing:'0.5px',marginBottom:'3px'}}>Oxy<span style={{color:GOLD}}>Gen</span> Care</div>
               <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'22px',fontWeight:500,color:'white',lineHeight:1}}>Espas Fanmi</div>
-              <div style={{fontSize:'11px',color:'rgba(255,255,255,0.45)',marginTop:'2px'}}>Madame Marie · OXC-0000847</div>
+              <div style={{fontSize:'11px',color:'rgba(255,255,255,0.45)',marginTop:'2px'}}>{userName || 'Pasyan'}</div>
             </div>
             {/* Invite button */}
             <button onClick={()=>setShowInvite(true)} style={{background:'rgba(212,168,67,0.2)',border:`1px solid ${GOLD}`,borderRadius:'10px',padding:'7px 12px',color:GOLD,fontSize:'11px',fontWeight:700,cursor:'pointer',fontFamily:'DM Sans, sans-serif',display:'flex',alignItems:'center',gap:'5px',flexShrink:0}}>
@@ -148,10 +245,10 @@ export default function CareFamily() {
           {/* Tab toggle */}
           <div style={{display:'flex',gap:'6px'}}>
             <button className="tb" onClick={()=>setTab('monitor')} style={{flex:1,padding:'9px',borderRadius:'12px',fontSize:'12px',fontWeight:700,fontFamily:'DM Sans, sans-serif',border:`1px solid ${tab==='monitor'?GOLD:'rgba(255,255,255,0.15)'}`,background:tab==='monitor'?'rgba(212,168,67,0.2)':'rgba(255,255,255,0.08)',color:tab==='monitor'?GOLD:'rgba(255,255,255,0.55)',transition:'all .2s'}}>
-              Moun mwen ap swiv ({I_MONITOR.length})
+              Moun mwen ap swiv ({iMonitor.length})
             </button>
             <button className="tb" onClick={()=>setTab('myproches')} style={{flex:1,padding:'9px',borderRadius:'12px',fontSize:'12px',fontWeight:700,fontFamily:'DM Sans, sans-serif',border:`1px solid ${tab==='myproches'?'rgba(255,255,255,0.6)':'rgba(255,255,255,0.15)'}`,background:tab==='myproches'?'rgba(255,255,255,0.15)':'rgba(255,255,255,0.08)',color:tab==='myproches'?'white':'rgba(255,255,255,0.55)',transition:'all .2s'}}>
-              Moun ki wè done mwen ({MY_PROCHES.length})
+              Moun ki wè done mwen ({myProches.length})
             </button>
           </div>
         </div>
@@ -166,7 +263,15 @@ export default function CareFamily() {
               <span style={{fontWeight:700,color:NAVY}}>Aksè lekti sèlman.</span> Ou wè done fanmi ou — yo pa ka wè pa ou sauf si yo envite ou tou.
             </div>
 
-            {I_MONITOR.map((m,idx)=>{
+            {loading ? (
+              <div style={{textAlign:'center',padding:'32px',color:'#6B7A90'}}>N ap chaje...</div>
+            ) : iMonitor.length === 0 ? (
+              <div style={{textAlign:'center',padding:'40px 20px',color:'#6B7A90'}}>
+                <div style={{fontSize:'36px',marginBottom:'12px'}}>👨‍👩‍👧</div>
+                <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'20px',fontWeight:500,color:NAVY,marginBottom:'8px'}}>Pa gen moun ou ap swiv</div>
+                <div style={{fontSize:'13px',lineHeight:1.6}}>Mande yon manm fanmi ki itilize OxyGen Care pou envite ou wè done li.</div>
+              </div>
+            ) : iMonitor.map((m,idx)=>{
               const taS = statusColor[m.taStatus]
               return (
                 <div key={m.id} className={`c${idx+1} card-hover`} style={{background:'white',borderRadius:'18px',border:'1px solid rgba(27,42,74,0.07)',overflow:'hidden',marginBottom:'12px',boxShadow:'0 1px 4px rgba(0,0,0,0.04)'}}>
@@ -230,14 +335,6 @@ export default function CareFamily() {
               )
             })}
 
-            {/* Empty state if no one to monitor */}
-            {I_MONITOR.length===0&&(
-              <div style={{textAlign:'center',padding:'40px 20px',color:'#6B7A90'}}>
-                <div style={{fontSize:'36px',marginBottom:'12px'}}>👨‍👩‍👧</div>
-                <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'20px',fontWeight:500,color:NAVY,marginBottom:'8px'}}>Pa gen moun ou ap swiv</div>
-                <div style={{fontSize:'13px',lineHeight:1.6}}>Mande yon manm fanmi ki itilize OxyGen Care pou envite ou wè done li.</div>
-              </div>
-            )}
           </>
         )}
 
@@ -248,7 +345,9 @@ export default function CareFamily() {
               <span style={{fontWeight:700,color:NAVY}}>Ou kontwole ki moun ki wè done ou.</span> Ou ka retire aksè nenpòt lè.
             </div>
 
-            {MY_PROCHES.map((p,idx)=>(
+            {loading ? (
+              <div style={{textAlign:'center',padding:'32px',color:'#6B7A90'}}>N ap chaje...</div>
+            ) : myProches.map((p,idx)=>(
               <div key={p.id} className={`c${idx+1}`} style={{background:'white',borderRadius:'18px',border:'1px solid rgba(27,42,74,0.07)',overflow:'hidden',marginBottom:'12px',boxShadow:'0 1px 4px rgba(0,0,0,0.04)'}}>
                 {/* Proche header */}
                 <div style={{background:`linear-gradient(135deg,${NAVY} 0%,#2D4A6B 100%)`,padding:'12px 16px',display:'flex',alignItems:'center',gap:'12px'}}>
