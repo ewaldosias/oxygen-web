@@ -55,6 +55,62 @@ Format exact (null si non visible):
 }
 result_date: format "YYYY-MM-DD" si visible.
 confidence: 0.0 à 1.0 selon la clarté de l'image.
+Retourne UNIQUEMENT le JSON, aucun texte avant ou après.`,
+
+  consultation: `
+Tu es un assistant médical. Analyse cette feuille de consultation médicale manuscrite ou imprimée.
+Extrait toutes les informations visibles et retourne un JSON strict sans markdown.
+Format exact (null si non visible ou non mentionné):
+{
+  "ta_sys": null,
+  "ta_dia": null,
+  "fc": null,
+  "fr": null,
+  "temperature": null,
+  "spo2": null,
+  "poids": null,
+  "histoire_maladie": null,
+  "antecedents_medicaux": null,
+  "antecedents_chirurgicaux": null,
+  "antecedents_familiaux": null,
+  "allergies": null,
+  "diagnostic": null,
+  "prescription": null,
+  "notes": null,
+  "age_gestationnel_sem": null,
+  "hauteur_uterine": null,
+  "bdcf": null,
+  "proteinuria_bandelette": null,
+  "acuite_od_sc": null,
+  "acuite_og_sc": null,
+  "pression_oculaire_od": null,
+  "pression_oculaire_og": null,
+  "confidence": 0.0
+}
+confidence: 0.0 à 1.0 selon la clarté de l'image.
+Pour les champs textuels, extrais le texte tel quel en français ou créole.
+Retourne UNIQUEMENT le JSON, aucun texte avant ou après.`,
+  prescription: `
+Tu es un assistant médical. Analyse cette ordonnance médicale.
+Extrait tous les médicaments et instructions visibles et retourne un JSON strict sans markdown.
+Format exact:
+{
+  "medicaments": [
+    {
+      "nom": null,
+      "dosage": null,
+      "frequence": null,
+      "duree": null,
+      "instructions": null
+    }
+  ],
+  "prescripteur": null,
+  "date_prescription": null,
+  "notes": null,
+  "confidence": 0.0
+}
+medicaments: liste de tous les médicaments prescits.
+confidence: 0.0 à 1.0 selon la clarté de l'image.
 Retourne UNIQUEMENT le JSON, aucun texte avant ou après.`
 }
 
@@ -72,7 +128,7 @@ export async function POST(request: NextRequest) {
     }
 
     const response = await client.messages.create({
-      model: 'claude-sonnet-4-6',
+      model: 'claude-sonnet-4-20250514',
       max_tokens: 1000,
       messages: [{
         role: 'user',

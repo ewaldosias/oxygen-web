@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
 
@@ -76,6 +77,7 @@ function getPatientStatus(taSys: number|null, taDia: number|null, missing: boole
 type TabKey = 'patients' | 'alerts' | 'profile'
 
 export default function DoctorHome() {
+  const router    = useRouter()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   useMolCanvas(canvasRef)
 
@@ -283,14 +285,12 @@ export default function DoctorHome() {
         {/* ── FILTER CHIPS ── */}
         <div className="c1" style={{display:'flex',gap:'6px',overflowX:'auto',paddingBottom:'4px',marginBottom:'12px',scrollbarWidth:'none'}}>
           {[
-            { key:'all',     label:`Tout (${total})` },
-            { key:'alerts',  label:`🚨 Alèt (${alerts})` },
-            { key:'missing', label:`⚠ Pa antre (${missing})` },
-            ...(doctorSpec === 'generaliste' ? [
-              { key:'medecine_interne',   label:'🫀 Medsin Entèn' },
-              { key:'obstetrique_gyneco', label:'🤰 Obstetrik' },
-              { key:'ophtalmologie',      label:'👁️ Oftalmo' },
-            ] : [])
+            { key:'all',              label:`Tout (${total})` },
+            { key:'alerts',           label:`🚨 Alèt (${alerts})` },
+            { key:'missing',          label:`⚠ Pa antre (${missing})` },
+            { key:'medecine_interne', label:'🫀 Medsin Entèn' },
+            { key:'obstetrique',      label:'🤰 Obstetrik' },
+            { key:'ophtalmologie',    label:'👁️ Oftalmo' },
           ].map(f=>(
             <button key={f.key} className="tb" onClick={()=>setFilter(f.key)} style={{padding:'6px 14px',borderRadius:'20px',fontSize:'11px',fontWeight:700,cursor:'pointer',fontFamily:'DM Sans, sans-serif',whiteSpace:'nowrap',border:`1px solid ${filter===f.key?NAVY:'rgba(27,42,74,.12)'}`,background:filter===f.key?NAVY:'white',color:filter===f.key?'white':'#6B7A90',flexShrink:0,transition:'all .15s'}}>
               {f.label}
@@ -386,7 +386,7 @@ export default function DoctorHome() {
                       WA
                     </button>
                     {/* View detail */}
-                    <button style={{background:NAVY,color:'white',border:'none',borderRadius:'8px',padding:'6px 10px',fontSize:'10px',fontWeight:700,cursor:'pointer',fontFamily:'DM Sans, sans-serif'}}>
+                    <button onClick={()=>router.push(`/doctor/patient/${p.id}`)} style={{background:NAVY,color:'white',border:'none',borderRadius:'8px',padding:'6px 10px',fontSize:'10px',fontWeight:700,cursor:'pointer',fontFamily:'DM Sans, sans-serif'}}>
                       Wè →
                     </button>
                   </div>
