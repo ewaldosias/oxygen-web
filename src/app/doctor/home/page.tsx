@@ -2,6 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 const TEAL = '#0A7A6A'
 const NAVY = '#1B2A4A'
@@ -30,7 +36,7 @@ function useMolCanvas(ref: React.RefObject<HTMLCanvasElement | null>) {
   },[ref])
 }
 
-/* ── DEMO DATA ── */
+/* ── TYPES ── */
 interface Patient {
   id: string
   name: string
@@ -47,24 +53,24 @@ interface Patient {
   status: 'ok' | 'warn' | 'alert' | 'critical'
 }
 
-const DEMO_PATIENTS: Patient[] = [
-  { id:'1', name:'Marie Jeanne Louis',   oxcId:'OXC-0000847', age:'58 an', condition:'HTA + Dyabèt', specialty:'medecine_interne', taSys:162, taDia:98,  gly:187, lastEntry:'Jodi a 07h12', missing:false, streak:14, status:'alert'    },
-  { id:'2', name:'Jean-Pierre Osias',    oxcId:'OXC-0000412', age:'45 an', condition:'HTA',           specialty:'medecine_interne', taSys:138, taDia:85,  gly:null,lastEntry:'Yè 08h30',   missing:false, streak:22, status:'ok'       },
-  { id:'3', name:'Rachilde Saint-Fleur', oxcId:'OXC-0000613', age:'32 an', condition:'Gwosès 28 sem', specialty:'obstetrique',      taSys:142, taDia:92,  gly:null,lastEntry:'Jodi a 09h00',missing:false, streak:8,  status:'warn'     },
-  { id:'4', name:'Claudette Toussaint',  oxcId:'OXC-0000291', age:'67 an', condition:'Glokòm',        specialty:'ophtalmologie',    taSys:null,taDia:null, gly:null,lastEntry:'Yè 14h20',   missing:false, streak:5,  status:'ok'       },
-  { id:'5', name:'Ernst Belizaire',      oxcId:'OXC-0000534', age:'52 an', condition:'Dyabèt Tip 2',  specialty:'medecine_interne', taSys:null,taDia:null, gly:null,lastEntry:'Pa antre',    missing:true,  streak:0,  status:'warn'     },
-  { id:'6', name:'Nadège Pierre-Louis',  oxcId:'OXC-0000728', age:'29 an', condition:'Gwosès 36 sem', specialty:'obstetrique',      taSys:158, taDia:102, gly:null,lastEntry:'Jodi a 06h45',missing:false, streak:31, status:'critical' },
-]
-
 const STATUS_COLOR: Record<string,string>  = { ok:'#1A8A4A', warn:'#E07B2A', alert:'#C0392B', critical:'#7B0D1E' }
 const STATUS_LABEL: Record<string,string>  = { ok:'Nòmal', warn:'Swiv', alert:'Ijan', critical:'Kriz' }
 const STATUS_BG: Record<string,string>     = { ok:'rgba(26,138,74,.1)', warn:'rgba(224,123,42,.1)', alert:'rgba(192,57,43,.1)', critical:'rgba(123,13,30,.12)' }
 
 const SPECIALTY_LABEL: Record<string,string> = {
-  medecine_interne:'Medsin Entèn',
-  obstetrique:'Obstetrik',
-  ophtalmologie:'Oftalmo',
-  general:'Jeneral'
+  medecine_interne:   'Medsin Entèn',
+  obstetrique_gyneco: 'Obstetrik / Jeneko',
+  ophtalmologie:      'Oftalmo',
+  generaliste:        'Jeneral'
+}
+
+function getPatientStatus(taSys: number|null, taDia: number|null, missing: boolean): 'ok'|'warn'|'alert'|'critical' {
+  if (missing) return 'warn'
+  if (!taSys || !taDia) return 'ok'
+  if (taSys >= 180 || taDia >= 120) return 'critical'
+  if (taSys >= 160 || taDia >= 110) return 'alert'
+  if (taSys >= 130 || taDia >= 90)  return 'warn'
+  return 'ok'
 }
 
 type TabKey = 'patients' | 'alerts' | 'profile'
@@ -80,26 +86,125 @@ export default function DoctorHome() {
   const [invitePhone, setInvitePhone] = useState('')
   const [inviteCond,  setInviteCond]  = useState('')
   const [inviteSent,  setInviteSent]  = useState(false)
+  const [patients,    setPatients]    = useState<Patient[]>([])
+  const [doctorName,  setDoctorName]  = useState('')
+  const [doctorSpec,  setDoctorSpec]  = useState('')
+  const [loading,     setLoading]     = useState(true)
+
+  useEffect(() => { loadData() }, [])
+
+  async function loadData() {
+    setLoading(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      // Fetch doctor profile
+      const { data: dp } = await supabase
+        .from('doctor_profiles')
+        .select('full_name, specialty')
+        .eq('user_id', user.id)
+        .maybeSingle()
+      if (dp) { setDoctorName(dp.full_name || ''); setDoctorSpec(dp.specialty || '') }
+
+      // Fetch doctor's patients
+      const { data: docPatients } = await supabase
+        .from('doctor_patients')
+        .select('*')
+        .eq('doctor_id', user.id)
+        .neq('status', 'archived')
+        .order('created_at', { ascending: false })
+
+      if (!docPatients) { setLoading(false); return }
+
+      // For each patient, fetch latest vitals
+      const enriched: Patient[] = await Promise.all(docPatients.map(async (dp: any) => {
+        let taSys = null, taDia = null, gly = null, lastEntry = 'Pako antre', streak = 0
+
+        if (dp.patient_id) {
+          const { data: readings } = await supabase
+            .from('vital_signs_readings')
+            .select('ta_sys, ta_dia, glycemie, recorded_at')
+            .eq('user_id', dp.patient_id)
+            .order('recorded_at', { ascending: false })
+            .limit(7)
+
+          if (readings && readings.length > 0) {
+            taSys     = readings[0].ta_sys
+            taDia     = readings[0].ta_dia
+            gly       = readings[0].glycemie
+            streak    = readings.length
+            const d   = new Date(readings[0].recorded_at)
+            const diffH = Math.floor((Date.now() - d.getTime()) / 3600000)
+            lastEntry = diffH < 1 ? 'Jodi a' : diffH < 24 ? `${diffH}h de sa` : `${Math.floor(diffH/24)} jou de sa`
+          }
+        }
+
+        const todayStr = new Date().toDateString()
+        const missing  = lastEntry === 'Pako antre' || (
+          dp.patient_id && lastEntry !== 'Jodi a' && !lastEntry.includes('h de sa')
+        )
+
+        return {
+          id:        dp.id,
+          name:      dp.patient_name || 'Pasyan',
+          oxcId:     dp.patient_oxc_id || '—',
+          age:       '—',
+          condition: (dp.conditions || []).join(' + ') || dp.specialty || '—',
+          specialty: dp.specialty || '',
+          taSys, taDia, gly,
+          lastEntry,
+          missing:   !dp.patient_id || lastEntry === 'Pako antre',
+          streak,
+          status:    getPatientStatus(taSys, taDia, !dp.patient_id),
+        }
+      }))
+
+      setPatients(enriched)
+    } catch (err) {
+      console.error('doctor loadData error:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   // Stats
-  const total    = DEMO_PATIENTS.length
-  const alerts   = DEMO_PATIENTS.filter(p=>p.status==='alert'||p.status==='critical').length
-  const missing  = DEMO_PATIENTS.filter(p=>p.missing).length
-  const critical = DEMO_PATIENTS.filter(p=>p.status==='critical')
+  const total    = patients.length
+  const alerts   = patients.filter(p=>p.status==='alert'||p.status==='critical').length
+  const missing  = patients.filter(p=>p.missing).length
+  const critical = patients.filter(p=>p.status==='critical')
 
-  // Filtered patients
-  const filtered = filter === 'all'
-    ? DEMO_PATIENTS
-    : filter === 'alerts'
-    ? DEMO_PATIENTS.filter(p=>p.status==='alert'||p.status==='critical')
-    : filter === 'missing'
-    ? DEMO_PATIENTS.filter(p=>p.missing)
-    : DEMO_PATIENTS.filter(p=>p.specialty===filter)
+  // Filtered
+  const filtered = filter === 'all'     ? patients
+    : filter === 'alerts'               ? patients.filter(p=>p.status==='alert'||p.status==='critical')
+    : filter === 'missing'              ? patients.filter(p=>p.missing)
+    : patients.filter(p=>p.specialty===filter)
 
   async function handleInvite() {
-    await new Promise(r=>setTimeout(r,800))
-    setInviteSent(true)
-    setTimeout(()=>{setShowInvite(false);setInviteSent(false);setInviteName('');setInvitePhone('');setInviteCond('')},2000)
+    if (!inviteName || !invitePhone) return
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      await supabase.from('doctor_patients').insert({
+        doctor_id:     user.id,
+        patient_name:  inviteName,
+        patient_phone: invitePhone,
+        specialty:     doctorSpec || 'generaliste',
+        conditions:    inviteCond ? [inviteCond] : [],
+        status:        'invited',
+        invite_sent_at: new Date().toISOString(),
+      })
+      setInviteSent(true)
+      setTimeout(() => {
+        setShowInvite(false); setInviteSent(false)
+        setInviteName(''); setInvitePhone(''); setInviteCond('')
+        loadData()
+      }, 2000)
+    } catch (err) {
+      console.error('handleInvite error:', err)
+      setInviteSent(true)
+      setTimeout(() => { setShowInvite(false); setInviteSent(false) }, 2000)
+    }
   }
 
   return (
@@ -132,9 +237,11 @@ export default function DoctorHome() {
                 Oxy<span style={{color:GOLD}}>Gen</span> Care
               </div>
               <div style={{fontSize:'11px',color:'rgba(255,255,255,.45)',marginBottom:'3px'}}>Bonjou,</div>
-              <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'22px',fontWeight:500,color:'white',lineHeight:1}}>Dr. Jean Pierre</div>
+              <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'22px',fontWeight:500,color:'white',lineHeight:1}}>
+                {loading ? '...' : doctorName || 'Doktè'}
+              </div>
               <div style={{fontSize:'11px',color:'rgba(255,255,255,.4)',marginTop:'3px'}}>
-                {SPECIALTY_LABEL['medecine_interne']} · {total} pasyan
+                {SPECIALTY_LABEL[doctorSpec] || 'Medsen'} · {total} pasyan
               </div>
             </div>
             {/* Add patient button */}
@@ -176,12 +283,14 @@ export default function DoctorHome() {
         {/* ── FILTER CHIPS ── */}
         <div className="c1" style={{display:'flex',gap:'6px',overflowX:'auto',paddingBottom:'4px',marginBottom:'12px',scrollbarWidth:'none'}}>
           {[
-            { key:'all',              label:`Tout (${total})` },
-            { key:'alerts',           label:`🚨 Alèt (${alerts})` },
-            { key:'missing',          label:`⚠ Pa antre (${missing})` },
-            { key:'medecine_interne', label:'🫀 Medsin Entèn' },
-            { key:'obstetrique',      label:'🤰 Obstetrik' },
-            { key:'ophtalmologie',    label:'👁️ Oftalmo' },
+            { key:'all',     label:`Tout (${total})` },
+            { key:'alerts',  label:`🚨 Alèt (${alerts})` },
+            { key:'missing', label:`⚠ Pa antre (${missing})` },
+            ...(doctorSpec === 'generaliste' ? [
+              { key:'medecine_interne',   label:'🫀 Medsin Entèn' },
+              { key:'obstetrique_gyneco', label:'🤰 Obstetrik' },
+              { key:'ophtalmologie',      label:'👁️ Oftalmo' },
+            ] : [])
           ].map(f=>(
             <button key={f.key} className="tb" onClick={()=>setFilter(f.key)} style={{padding:'6px 14px',borderRadius:'20px',fontSize:'11px',fontWeight:700,cursor:'pointer',fontFamily:'DM Sans, sans-serif',whiteSpace:'nowrap',border:`1px solid ${filter===f.key?NAVY:'rgba(27,42,74,.12)'}`,background:filter===f.key?NAVY:'white',color:filter===f.key?'white':'#6B7A90',flexShrink:0,transition:'all .15s'}}>
               {f.label}
@@ -191,10 +300,17 @@ export default function DoctorHome() {
 
         {/* ── PATIENT LIST ── */}
         <div className="c2">
-          {filtered.length === 0 ? (
+          {loading ? (
             <div style={{textAlign:'center',padding:'40px 20px',color:'#6B7A90'}}>
-              <div style={{fontSize:'32px',marginBottom:'10px'}}>🔍</div>
-              <div style={{fontSize:'14px',fontWeight:600}}>Pa gen pasyan nan kategori sa</div>
+              <div style={{fontSize:'24px',marginBottom:'10px'}}>⏳</div>
+              <div style={{fontSize:'14px',fontWeight:600}}>N ap chaje pasyan yo...</div>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div style={{textAlign:'center',padding:'40px 20px',color:'#6B7A90'}}>
+              <div style={{fontSize:'32px',marginBottom:'10px'}}>{patients.length === 0 ? '👥' : '🔍'}</div>
+              <div style={{fontSize:'14px',fontWeight:600}}>
+                {patients.length === 0 ? 'Pa gen pasyan ankò — ajoute premye a !' : 'Pa gen pasyan nan kategori sa'}
+              </div>
             </div>
           ) : filtered.map((p,idx)=>(
             <div key={p.id} className="card" style={{background:'white',borderRadius:'18px',border:`1px solid ${p.status==='critical'?'rgba(192,57,43,.3)':p.status==='alert'?'rgba(192,57,43,.15)':'rgba(27,42,74,.07)'}`,overflow:'hidden',marginBottom:'10px',boxShadow:`0 1px 4px rgba(0,0,0,.04)${p.status==='critical'?',0 0 0 2px rgba(192,57,43,.15)':''}`,cursor:'pointer'}}>
