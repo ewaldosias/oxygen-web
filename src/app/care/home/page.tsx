@@ -1,9 +1,13 @@
 'use client'
 
+import Grain from '@/components/Grain'
+import { isPreview } from '@/lib/preview'
+
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
+import { Flame, Droplet, Lightbulb, ChartColumn, Wifi, CircleCheck, Siren } from 'lucide-react'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -103,13 +107,13 @@ function useMolCanvas(ref: React.RefObject<HTMLCanvasElement | null>) {
 
 /* ── TA STATUS ── */
 function getTaStatus(sys: number, dia: number) {
-  if (sys>=180||dia>=120) return { color:'#7B0D1E', label:'🚨 Kriz',           bg:'rgba(123,13,30,.08)'   }
-  if (sys>=160||dia>=110) return { color:'#C0392B', label:'🔴 Tansyon Wo Anpil',bg:'rgba(192,57,43,.08)'  }
-  if (sys>=140||dia>=100) return { color:'#E07B2A', label:'🟠 Tansyon Limit',   bg:'rgba(224,123,42,.08)' }
-  if (sys>=130||dia>=90)  return { color:'#E0A82A', label:'🟡 Yon ti jan wo',   bg:'rgba(224,168,42,.08)' }
-  if (sys>=100&&dia>=65)  return { color:'#1A8A4A', label:'✓ Nòmal',            bg:'rgba(26,138,74,.08)'  }
-  if (sys>=90 ||dia>=60)  return { color:'#3AA876', label:'🔵 Ba Nòmal',         bg:'rgba(58,168,118,.08)' }
-  return                          { color:'#C0392B', label:'🔴 Ipotansyon',       bg:'rgba(192,57,43,.08)'  }
+  if (sys>=180||dia>=120) return { color:'#7B0D1E', label:'Kriz',           bg:'rgba(123,13,30,.08)'   }
+  if (sys>=160||dia>=110) return { color:'#C0392B', label:'Tansyon Wo Anpil',bg:'rgba(192,57,43,.08)'  }
+  if (sys>=140||dia>=100) return { color:'#E07B2A', label:'Tansyon Limit',   bg:'rgba(224,123,42,.08)' }
+  if (sys>=130||dia>=90)  return { color:'#E0A82A', label:'Yon ti jan wo',   bg:'rgba(224,168,42,.08)' }
+  if (sys>=100&&dia>=65)  return { color:'#1A8A4A', label:'Nòmal',            bg:'rgba(26,138,74,.08)'  }
+  if (sys>=90 ||dia>=60)  return { color:'#3AA876', label:'Ba Nòmal',         bg:'rgba(58,168,118,.08)' }
+  return                          { color:'#C0392B', label:'Ipotansyon',       bg:'rgba(192,57,43,.08)'  }
 }
 
 /* ── DATA TYPES ── */
@@ -158,6 +162,7 @@ export default function CareHome() {
 
   async function loadData() {
     try {
+      if (isPreview()) { setLoading(false); return }
       // 1. Get current user
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/care/login'); return }
@@ -319,9 +324,10 @@ export default function CareHome() {
   ]
 
   return (
-    <div style={{minHeight:'100vh',background:'#F0F4F9',fontFamily:'DM Sans, sans-serif',paddingBottom:'100px'}}>
+    <div style={{minHeight:'100vh',background:'radial-gradient(115% 78% at 50% -8%,#D6EBCE 0%,#E6F1DC 50%,#DBEBD1 100%)',fontFamily:'var(--font-manrope), Manrope, sans-serif',paddingBottom:'100px'}}>
+      <Grain/>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
         @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06);filter:drop-shadow(0 0 10px rgba(212,168,67,.4))}}
         @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
         @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
@@ -342,22 +348,24 @@ export default function CareHome() {
           {/* Name + date */}
           <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:'20px'}}>
             <div>
-              <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'11px',color:'rgba(255,255,255,.5)',letterSpacing:'.5px',marginBottom:'3px'}}>
+              <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'13px',fontWeight:700,color:'rgba(255,255,255,.6)',letterSpacing:'.3px',marginBottom:'4px'}}>
                 Oxy<span style={{color:GOLD}}>Gen</span> Care
               </div>
-              <div style={{fontSize:'11px',color:'rgba(255,255,255,.5)',marginBottom:'1px'}}>Bonjou,</div>
+              <div style={{fontSize:'14px',color:'rgba(255,255,255,.6)',marginBottom:'2px'}}>Bonjou,</div>
               {loading ? (
-                <div className="sk" style={{width:'140px',height:'26px'}}/>
+                <div className="sk" style={{width:'160px',height:'32px'}}/>
               ) : (
-                <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'24px',fontWeight:500,color:'white',lineHeight:1}}>{firstName}</div>
+                <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'30px',fontWeight:800,letterSpacing:'-0.5px',color:'white',lineHeight:1.05}}>{firstName}</div>
               )}
-              <div style={{fontSize:'11px',color:'rgba(255,255,255,.4)',marginTop:'3px',textTransform:'capitalize'}}>{today}</div>
+              <div style={{fontSize:'12.5px',color:'rgba(255,255,255,.5)',marginTop:'5px',textTransform:'capitalize'}}>{today}</div>
             </div>
             {/* Streak */}
             <div style={{background:'rgba(212,168,67,.15)',border:'1px solid rgba(212,168,67,.3)',borderRadius:'14px',padding:'10px 14px',textAlign:'center'}}>
               <div style={{fontFamily:'DM Mono, monospace',fontSize:'22px',fontWeight:700,color:GOLD,lineHeight:1}}>{loading?'…':streak}</div>
               <div style={{fontSize:'9px',fontWeight:700,color:'rgba(212,168,67,.7)',textTransform:'uppercase',letterSpacing:'.5px',marginTop:'2px'}}>
-                {streak > 1 ? '🔥 jou' : 'jou'}
+                {streak > 1 ? (
+                  <span style={{display:'inline-flex',alignItems:'center',gap:'3px'}}><Flame size={11} color={GOLD} strokeWidth={1.9}/> jou</span>
+                ) : 'jou'}
               </div>
             </div>
           </div>
@@ -423,7 +431,7 @@ export default function CareHome() {
         {/* ── GLYCÉMIE card ── */}
         {!loading && latestReading?.glycemie && (
           <div className="c2" style={{background:'white',borderRadius:'18px',border:'1px solid rgba(27,42,74,.07)',padding:'14px 16px',marginBottom:'12px',boxShadow:'0 1px 4px rgba(0,0,0,.04)',display:'flex',alignItems:'center',gap:'12px'}}>
-            <div style={{width:'44px',height:'44px',borderRadius:'12px',background:'rgba(10,122,106,.08)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,fontSize:'22px'}}>🩸</div>
+            <div style={{width:'44px',height:'44px',borderRadius:'12px',background:'rgba(10,122,106,.08)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><Droplet size={22} color={TEAL} strokeWidth={1.9}/></div>
             <div style={{flex:1}}>
               <div style={{fontSize:'10px',fontWeight:700,color:'#6B7A90',textTransform:'uppercase',letterSpacing:'.5px',marginBottom:'2px'}}>Dènye Glisemi</div>
               <div style={{display:'flex',alignItems:'baseline',gap:'6px'}}>
@@ -439,8 +447,8 @@ export default function CareHome() {
         {!loading && tip && (
           <div className="c2" style={{background:`linear-gradient(135deg,${NAVY} 0%,#2D4A6B 100%)`,borderRadius:'18px',padding:'16px',marginBottom:'12px',position:'relative',overflow:'hidden'}}>
             <div style={{position:'absolute',top:'-20px',right:'-20px',fontSize:'80px',opacity:.06}}>{tip.icon}</div>
-            <div style={{fontSize:'10px',fontWeight:700,color:GOLD,textTransform:'uppercase',letterSpacing:'1.5px',marginBottom:'8px'}}>
-              💡 Konsèy jounen an
+            <div style={{fontSize:'10px',fontWeight:700,color:GOLD,textTransform:'uppercase',letterSpacing:'1.5px',marginBottom:'8px',display:'flex',alignItems:'center',gap:'6px'}}>
+              <Lightbulb size={13} color={GOLD} strokeWidth={1.9}/> Konsèy jounen an
             </div>
             <div style={{fontSize:'14px',color:'rgba(255,255,255,.9)',lineHeight:1.6,fontWeight:400}}>
               {tip.icon} {tip.content_ht}
@@ -451,8 +459,8 @@ export default function CareHome() {
         {/* Empty state — no readings yet */}
         {!loading && !latestReading && (
           <div className="c2" style={{background:'white',borderRadius:'18px',border:'1.5px dashed rgba(27,42,74,.15)',padding:'24px',textAlign:'center',marginBottom:'12px'}}>
-            <div style={{fontSize:'36px',marginBottom:'10px'}}>📊</div>
-            <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'20px',fontWeight:500,color:NAVY,marginBottom:'6px'}}>Kòmanse swiv sante ou</div>
+            <div style={{marginBottom:'10px',display:'flex',justifyContent:'center'}}><ChartColumn size={36} color="#6B7A90" strokeWidth={1.9}/></div>
+            <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'20px',fontWeight:700,color:NAVY,marginBottom:'6px'}}>Kòmanse swiv sante ou</div>
             <div style={{fontSize:'13px',color:'#6B7A90',lineHeight:1.6,marginBottom:'16px'}}>Antre premye chif tansyon ou pou wè analiz ou yo aparèt isit.</div>
             <Link href="/care/entry" style={{textDecoration:'none'}}>
               <div style={{background:TEAL,color:'white',borderRadius:'12px',padding:'12px 24px',fontSize:'13px',fontWeight:700,display:'inline-block'}}>
@@ -481,21 +489,21 @@ export default function CareHome() {
         {/* ── BOUTON URGENCE ── */}
         <div style={{marginBottom:'12px'}}>
           {urgenceStep === 'idle' && (
-            <button onClick={()=>setUrgenceStep('confirm')} style={{width:'100%',background:'linear-gradient(135deg,#7B0D1E 0%,#C0392B 100%)',color:'white',border:'none',borderRadius:'18px',padding:'18px',fontSize:'16px',fontWeight:700,cursor:'pointer',fontFamily:'DM Sans, sans-serif',boxShadow:'0 6px 20px rgba(192,57,43,.4)',display:'flex',alignItems:'center',justifyContent:'center',gap:'10px'}}>
-              <span style={{fontSize:'22px'}}>🆘</span> Bouton Ijans
+            <button onClick={()=>setUrgenceStep('confirm')} style={{width:'100%',background:'linear-gradient(135deg,#7B0D1E 0%,#C0392B 100%)',color:'white',border:'none',borderRadius:'18px',padding:'18px',fontSize:'16px',fontWeight:700,cursor:'pointer',fontFamily:'var(--font-manrope), Manrope, sans-serif',boxShadow:'0 6px 20px rgba(192,57,43,.4)',display:'flex',alignItems:'center',justifyContent:'center',gap:'10px'}}>
+              <Siren size={20} strokeWidth={1.9}/> Bouton Ijans
             </button>
           )}
 
           {urgenceStep === 'confirm' && (
             <div style={{background:'white',borderRadius:'18px',border:'2px solid #C0392B',padding:'18px',boxShadow:'0 4px 16px rgba(192,57,43,.2)'}}>
-              <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'20px',fontWeight:500,color:'#C0392B',marginBottom:'6px',textAlign:'center'}}>Ou sèten ou bezwen èd ?</div>
+              <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'20px',fontWeight:700,color:'#C0392B',marginBottom:'6px',textAlign:'center'}}>Ou sèten ou bezwen èd ?</div>
               <div style={{fontSize:'12px',color:'#6B7A90',textAlign:'center',marginBottom:'16px',lineHeight:1.6}}>Aksyon sa ap voye yon mesaj WhatsApp bay pwòch ou yo ak pozisyon ou.</div>
               <div style={{display:'flex',gap:'10px'}}>
-                <button onClick={()=>setUrgenceStep('idle')} style={{flex:1,background:'rgba(27,42,74,.06)',color:NAVY,border:'1px solid rgba(27,42,74,.15)',borderRadius:'12px',padding:'13px',fontSize:'13px',fontWeight:600,cursor:'pointer',fontFamily:'DM Sans, sans-serif'}}>
+                <button onClick={()=>setUrgenceStep('idle')} style={{flex:1,background:'rgba(27,42,74,.06)',color:NAVY,border:'1px solid rgba(27,42,74,.15)',borderRadius:'12px',padding:'13px',fontSize:'13px',fontWeight:600,cursor:'pointer',fontFamily:'var(--font-manrope), Manrope, sans-serif'}}>
                   Anile
                 </button>
-                <button onClick={handleUrgence} style={{flex:2,background:'#C0392B',color:'white',border:'none',borderRadius:'12px',padding:'13px',fontSize:'13px',fontWeight:700,cursor:'pointer',fontFamily:'DM Sans, sans-serif',boxShadow:'0 4px 12px rgba(192,57,43,.3)'}}>
-                  🆘 Wi — Voye alèt
+                <button onClick={handleUrgence} style={{flex:2,background:'#C0392B',color:'white',border:'none',borderRadius:'12px',padding:'13px',fontSize:'13px',fontWeight:700,cursor:'pointer',fontFamily:'var(--font-manrope), Manrope, sans-serif',boxShadow:'0 4px 12px rgba(192,57,43,.3)'}}>
+                  <span style={{display:'inline-flex',alignItems:'center',gap:'6px'}}><Siren size={15} strokeWidth={2}/> Wi — Voye alèt</span>
                 </button>
               </div>
             </div>
@@ -503,15 +511,15 @@ export default function CareHome() {
 
           {urgenceStep === 'sending' && (
             <div style={{background:'rgba(192,57,43,.08)',border:'1px solid rgba(192,57,43,.2)',borderRadius:'18px',padding:'18px',textAlign:'center'}}>
-              <div style={{fontSize:'24px',marginBottom:'8px'}}>📡</div>
+              <div style={{marginBottom:'8px',display:'flex',justifyContent:'center'}}><Wifi size={24} color="#C0392B" strokeWidth={1.9}/></div>
               <div style={{fontSize:'14px',fontWeight:600,color:'#C0392B'}}>N ap voye alèt la...</div>
             </div>
           )}
 
           {urgenceStep === 'sent' && (
             <div style={{background:'rgba(26,138,74,.08)',border:'1px solid rgba(26,138,74,.2)',borderRadius:'18px',padding:'18px',textAlign:'center'}}>
-              <div style={{fontSize:'24px',marginBottom:'8px'}}>✅</div>
-              <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'18px',fontWeight:500,color:'#1A8A4A',marginBottom:'4px'}}>Alèt voye !</div>
+              <div style={{marginBottom:'8px',display:'flex',justifyContent:'center'}}><CircleCheck size={24} color={TEAL} strokeWidth={1.9}/></div>
+              <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'18px',fontWeight:700,color:'#1A8A4A',marginBottom:'4px'}}>Alèt voye !</div>
               <div style={{fontSize:'12px',color:'#6B7A90'}}>Pwòch ou yo resevwa yon mesaj WhatsApp</div>
             </div>
           )}

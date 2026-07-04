@@ -11,7 +11,7 @@ export default function CareLayout({
       background: '#EEF2F7',
       position: 'relative',
       overflow: 'hidden',
-      fontFamily: 'DM Sans, sans-serif'
+      fontFamily: 'var(--font-manrope), Manrope, sans-serif'
     }}>
       {children}
     </div>

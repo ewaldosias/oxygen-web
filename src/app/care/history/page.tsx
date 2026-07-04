@@ -1,8 +1,12 @@
 'use client'
 
+import Grain from '@/components/Grain'
+import { isPreview } from '@/lib/preview'
+
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
+import { HeartPulse, Droplet } from 'lucide-react'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -137,9 +141,9 @@ function TaChart({ data }: { data: Reading[] }) {
 
       {/* Legend */}
       <circle cx={pad+4} cy={8} r="3" fill={GOLD}/>
-      <text x={pad+10} y={12} fill="rgba(255,255,255,0.5)" fontSize="8" fontFamily="DM Sans">Sistòl</text>
+      <text x={pad+10} y={12} fill="rgba(255,255,255,0.5)" fontSize="8" fontFamily="Manrope">Sistòl</text>
       <line x1={pad+50} y1={8} x2={pad+62} y2={8} stroke="rgba(255,255,255,0.35)" strokeWidth="1.5" strokeDasharray="3 2"/>
-      <text x={pad+66} y={12} fill="rgba(255,255,255,0.5)" fontSize="8" fontFamily="DM Sans">Diastòl</text>
+      <text x={pad+66} y={12} fill="rgba(255,255,255,0.5)" fontSize="8" fontFamily="Manrope">Diastòl</text>
     </svg>
   )
 }
@@ -192,6 +196,7 @@ export default function CareHistory() {
   async function loadData() {
     setLoading(true)
     try {
+      if (isPreview()) { setLoading(false); return }
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
@@ -223,9 +228,10 @@ export default function CareHistory() {
   const has90d     = totalDays >= 90
 
   return (
-    <div style={{minHeight:'100vh',background:'#F0F4F9',fontFamily:'DM Sans, sans-serif',paddingBottom:'100px'}}>
+    <div style={{minHeight:'100vh',background:'radial-gradient(115% 78% at 50% -8%,#D6EBCE 0%,#E6F1DC 50%,#DBEBD1 100%)',fontFamily:'var(--font-manrope), Manrope, sans-serif',paddingBottom:'100px'}}>
+      <Grain/>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
         @keyframes breathe{0%,100%{transform:scale(1);filter:drop-shadow(0 0 0px rgba(212,168,67,0))}50%{transform:scale(1.06);filter:drop-shadow(0 0 10px rgba(212,168,67,0.4))}}
         @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
         .bb{animation:breathe 4.5s ease-in-out infinite}
@@ -250,8 +256,8 @@ export default function CareHistory() {
               <svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M7 1L1 6.5L7 12" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>
             </Link>
             <div style={{flex:1}}>
-              <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'11px',fontWeight:400,color:'rgba(255,255,255,0.5)',letterSpacing:'0.5px',marginBottom:'3px'}}>Oxy<span style={{color:GOLD}}>Gen</span> Care</div>
-              <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'22px',fontWeight:500,color:'white',lineHeight:1}}>Istorik mwen</div>
+              <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'13px',fontWeight:700,color:'rgba(255,255,255,0.6)',letterSpacing:'0.3px',marginBottom:'4px'}}>Oxy<span style={{color:GOLD}}>Gen</span> Care</div>
+              <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'27px',fontWeight:800,letterSpacing:'-0.5px',color:'white',lineHeight:1.05}}>Istorik mwen</div>
               <div style={{fontSize:'11px',color:'rgba(255,255,255,0.45)',marginTop:'2px'}}>Madame Marie · OXC-0000847</div>
             </div>
 
@@ -259,8 +265,9 @@ export default function CareHistory() {
 
           {/* View toggle: TA vs GLY */}
           <div style={{display:'flex',gap:'6px',marginBottom:'16px'}}>
-            {([['ta','❤ Tansyon'],['gly','◉ Sik']] as [View,string][]).map(([key,label])=>(
-              <button key={key} className="tb" onClick={()=>setView(key)} style={{flex:1,padding:'9px',borderRadius:'12px',fontSize:'12px',fontWeight:700,fontFamily:'DM Sans, sans-serif',border:`1px solid ${view===key?GOLD:'rgba(255,255,255,0.15)'}`,background:view===key?`rgba(212,168,67,0.2)`:'rgba(255,255,255,0.08)',color:view===key?GOLD:'rgba(255,255,255,0.55)',transition:'all .2s'}}>
+            {([['ta','Tansyon'],['gly','Sik']] as [View,string][]).map(([key,label])=>(
+              <button key={key} className="tb" onClick={()=>setView(key)} style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',gap:'6px',padding:'9px',borderRadius:'12px',fontSize:'12px',fontWeight:700,fontFamily:'var(--font-manrope), Manrope, sans-serif',border:`1px solid ${view===key?GOLD:'rgba(255,255,255,0.15)'}`,background:view===key?`rgba(212,168,67,0.2)`:'rgba(255,255,255,0.08)',color:view===key?GOLD:'rgba(255,255,255,0.55)',transition:'all .2s'}}>
+                {key==='ta' ? <HeartPulse size={14}/> : <Droplet size={14}/>}
                 {label}
               </button>
             ))}
@@ -269,7 +276,7 @@ export default function CareHistory() {
           {/* Period selector */}
           <div style={{display:'flex',gap:'5px',marginBottom:'16px'}}>
             {(['7j','30j','3m'] as Period[]).map(p=>(
-              <button key={p} className="tb" onClick={()=>setPeriod(p)} style={{padding:'5px 16px',borderRadius:'20px',fontSize:'11px',fontWeight:700,fontFamily:'DM Sans, sans-serif',border:`1px solid ${period===p?'white':'rgba(255,255,255,0.2)'}`,background:period===p?'rgba(255,255,255,0.2)':'transparent',color:period===p?'white':'rgba(255,255,255,0.45)',transition:'all .2s'}}>
+              <button key={p} className="tb" onClick={()=>setPeriod(p)} style={{padding:'5px 16px',borderRadius:'20px',fontSize:'11px',fontWeight:700,fontFamily:'var(--font-manrope), Manrope, sans-serif',border:`1px solid ${period===p?'white':'rgba(255,255,255,0.2)'}`,background:period===p?'rgba(255,255,255,0.2)':'transparent',color:period===p?'white':'rgba(255,255,255,0.45)',transition:'all .2s'}}>
                 {p}
               </button>
             ))}

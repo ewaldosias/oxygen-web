@@ -1,9 +1,13 @@
 'use client'
 
+import Grain from '@/components/Grain'
+import { isPreview } from '@/lib/preview'
+
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
+import { TriangleAlert, Users, Search, Baby, Eye, User, CircleCheck, Bell, Stethoscope } from 'lucide-react'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -98,6 +102,7 @@ export default function DoctorHome() {
   async function loadData() {
     setLoading(true)
     try {
+      if (isPreview()) { setLoading(false); return }
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
@@ -210,9 +215,10 @@ export default function DoctorHome() {
   }
 
   return (
-    <div style={{minHeight:'100vh',background:'#F0F4F9',fontFamily:'DM Sans, sans-serif',paddingBottom:'100px'}}>
+    <div style={{minHeight:'100vh',background:'radial-gradient(115% 78% at 50% -8%,#D6EBCE 0%,#E6F1DC 50%,#DBEBD1 100%)',fontFamily:'var(--font-manrope), Manrope, sans-serif',paddingBottom:'100px'}}>
+      <Grain/>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
         @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
         @keyframes modalIn{from{opacity:0;transform:translateY(100%)}to{opacity:1;transform:translateY(0)}}
         @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
@@ -235,11 +241,11 @@ export default function DoctorHome() {
           {/* Top row */}
           <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:'18px'}}>
             <div>
-              <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'11px',fontWeight:400,color:'rgba(255,255,255,.5)',letterSpacing:'.5px',marginBottom:'3px'}}>
+              <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'13px',fontWeight:700,color:'rgba(255,255,255,.6)',letterSpacing:'.3px',marginBottom:'4px'}}>
                 Oxy<span style={{color:GOLD}}>Gen</span> Care
               </div>
-              <div style={{fontSize:'11px',color:'rgba(255,255,255,.45)',marginBottom:'3px'}}>Bonjou,</div>
-              <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'22px',fontWeight:500,color:'white',lineHeight:1}}>
+              <div style={{fontSize:'14px',color:'rgba(255,255,255,.6)',marginBottom:'2px'}}>Bonjou,</div>
+              <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'30px',fontWeight:800,letterSpacing:'-0.5px',color:'white',lineHeight:1.05}}>
                 {loading ? '...' : doctorName || 'Doktè'}
               </div>
               <div style={{fontSize:'11px',color:'rgba(255,255,255,.4)',marginTop:'3px'}}>
@@ -247,7 +253,7 @@ export default function DoctorHome() {
               </div>
             </div>
             {/* Add patient button */}
-            <button onClick={()=>setShowInvite(true)} style={{background:`rgba(212,168,67,.2)`,border:`1px solid ${GOLD}`,borderRadius:'12px',padding:'9px 14px',color:GOLD,fontSize:'12px',fontWeight:700,cursor:'pointer',fontFamily:'DM Sans, sans-serif',display:'flex',alignItems:'center',gap:'6px',flexShrink:0}}>
+            <button onClick={()=>setShowInvite(true)} style={{background:`rgba(212,168,67,.2)`,border:`1px solid ${GOLD}`,borderRadius:'12px',padding:'9px 14px',color:GOLD,fontSize:'12px',fontWeight:700,cursor:'pointer',fontFamily:'var(--font-manrope), Manrope, sans-serif',display:'flex',alignItems:'center',gap:'6px',flexShrink:0}}>
               <span style={{fontSize:'16px'}}>+</span> Ajoute pasyan
             </button>
           </div>
@@ -269,12 +275,12 @@ export default function DoctorHome() {
           {/* Critical alert banner */}
           {critical.length > 0 && (
             <div className="pulse" style={{background:'rgba(123,13,30,.3)',border:'1px solid rgba(192,57,43,.4)',borderRadius:'12px',padding:'10px 14px',display:'flex',alignItems:'center',gap:'10px'}}>
-              <span style={{fontSize:'16px'}}>🚨</span>
+              <TriangleAlert size={16} strokeWidth={1.9} color="#C0392B" />
               <div style={{flex:1}}>
                 <div style={{fontSize:'12px',fontWeight:700,color:'#FF8A8A'}}>KRIZ — Atansyon imedyat</div>
                 <div style={{fontSize:'11px',color:'rgba(255,138,138,.7)',marginTop:'2px'}}>{critical.map(p=>p.name.split(' ')[0]).join(', ')} — tansyon kritik</div>
               </div>
-              <button style={{background:'#C0392B',color:'white',border:'none',borderRadius:'8px',padding:'6px 12px',fontSize:'11px',fontWeight:700,cursor:'pointer',fontFamily:'DM Sans, sans-serif'}}>Wè</button>
+              <button style={{background:'#C0392B',color:'white',border:'none',borderRadius:'8px',padding:'6px 12px',fontSize:'11px',fontWeight:700,cursor:'pointer',fontFamily:'var(--font-manrope), Manrope, sans-serif'}}>Wè</button>
             </div>
           )}
         </div>
@@ -286,13 +292,13 @@ export default function DoctorHome() {
         <div className="c1" style={{display:'flex',gap:'6px',overflowX:'auto',paddingBottom:'4px',marginBottom:'12px',scrollbarWidth:'none'}}>
           {[
             { key:'all',              label:`Tout (${total})` },
-            { key:'alerts',           label:`🚨 Alèt (${alerts})` },
-            { key:'missing',          label:`⚠ Pa antre (${missing})` },
-            { key:'medecine_interne', label:'🫀 Medsin Entèn' },
-            { key:'obstetrique',      label:'🤰 Obstetrik' },
-            { key:'ophtalmologie',    label:'👁️ Oftalmo' },
+            { key:'alerts',           label:`Alèt (${alerts})` },
+            { key:'missing',          label:`Pa antre (${missing})` },
+            { key:'medecine_interne', label:'Medsin Entèn' },
+            { key:'obstetrique',      label:'Obstetrik' },
+            { key:'ophtalmologie',    label:'Oftalmo' },
           ].map(f=>(
-            <button key={f.key} className="tb" onClick={()=>setFilter(f.key)} style={{padding:'6px 14px',borderRadius:'20px',fontSize:'11px',fontWeight:700,cursor:'pointer',fontFamily:'DM Sans, sans-serif',whiteSpace:'nowrap',border:`1px solid ${filter===f.key?NAVY:'rgba(27,42,74,.12)'}`,background:filter===f.key?NAVY:'white',color:filter===f.key?'white':'#6B7A90',flexShrink:0,transition:'all .15s'}}>
+            <button key={f.key} className="tb" onClick={()=>setFilter(f.key)} style={{padding:'6px 14px',borderRadius:'20px',fontSize:'11px',fontWeight:700,cursor:'pointer',fontFamily:'var(--font-manrope), Manrope, sans-serif',whiteSpace:'nowrap',border:`1px solid ${filter===f.key?NAVY:'rgba(27,42,74,.12)'}`,background:filter===f.key?NAVY:'white',color:filter===f.key?'white':'#6B7A90',flexShrink:0,transition:'all .15s'}}>
               {f.label}
             </button>
           ))}
@@ -307,7 +313,7 @@ export default function DoctorHome() {
             </div>
           ) : filtered.length === 0 ? (
             <div style={{textAlign:'center',padding:'40px 20px',color:'#6B7A90'}}>
-              <div style={{fontSize:'32px',marginBottom:'10px'}}>{patients.length === 0 ? '👥' : '🔍'}</div>
+              <div style={{marginBottom:'10px'}}>{patients.length === 0 ? <Users size={32} strokeWidth={1.9} color="#6B7A90" /> : <Search size={32} strokeWidth={1.9} color="#6B7A90" />}</div>
               <div style={{fontSize:'14px',fontWeight:600}}>
                 {patients.length === 0 ? 'Pa gen pasyan ankò — ajoute premye a !' : 'Pa gen pasyan nan kategori sa'}
               </div>
@@ -317,8 +323,8 @@ export default function DoctorHome() {
 
               {/* Patient header */}
               <div style={{background:`linear-gradient(135deg,${p.status==='critical'?'#7B0D1E':p.status==='alert'?'#8B2317':NAVY} 0%,${p.status==='critical'?'#A01020':p.status==='alert'?'#C0392B':'#2D4A6B'} 100%)`,padding:'12px 16px',display:'flex',alignItems:'center',gap:'12px'}}>
-                <div style={{width:'36px',height:'36px',borderRadius:'50%',background:'rgba(255,255,255,.15)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'16px',flexShrink:0}}>
-                  {p.specialty==='obstetrique'?'🤰':p.specialty==='ophtalmologie'?'👁️':'👤'}
+                <div style={{width:'36px',height:'36px',borderRadius:'50%',background:'rgba(255,255,255,.15)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+                  {p.specialty==='obstetrique'?<Baby size={16} strokeWidth={1.9} color="white" />:p.specialty==='ophtalmologie'?<Eye size={16} strokeWidth={1.9} color="white" />:<User size={16} strokeWidth={1.9} color="white" />}
                 </div>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontSize:'13px',fontWeight:700,color:'white',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{p.name}</div>
@@ -333,7 +339,7 @@ export default function DoctorHome() {
               <div style={{padding:'12px 16px'}}>
                 {p.missing ? (
                   <div style={{background:'rgba(224,168,42,.08)',border:'1px solid rgba(224,168,42,.2)',borderRadius:'10px',padding:'10px 14px',display:'flex',alignItems:'center',gap:'10px'}}>
-                    <span style={{fontSize:'18px'}}>⚠</span>
+                    <TriangleAlert size={18} strokeWidth={1.9} color="#C0392B" />
                     <div>
                       <div style={{fontSize:'12px',fontWeight:700,color:'#E07B2A'}}>Chif pa antre jodi a</div>
                       <div style={{fontSize:'11px',color:'rgba(27,42,74,.5)',marginTop:'2px'}}>Dènye antre: {p.lastEntry}</div>
@@ -381,12 +387,12 @@ export default function DoctorHome() {
                   </div>
                   <div style={{display:'flex',gap:'6px'}}>
                     {/* WhatsApp */}
-                    <button style={{background:'#25D366',color:'white',border:'none',borderRadius:'8px',padding:'6px 10px',fontSize:'10px',fontWeight:700,cursor:'pointer',fontFamily:'DM Sans, sans-serif',display:'flex',alignItems:'center',gap:'4px'}}>
+                    <button style={{background:'#25D366',color:'white',border:'none',borderRadius:'8px',padding:'6px 10px',fontSize:'10px',fontWeight:700,cursor:'pointer',fontFamily:'var(--font-manrope), Manrope, sans-serif',display:'flex',alignItems:'center',gap:'4px'}}>
                       <svg width="11" height="11" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
                       WA
                     </button>
                     {/* View detail */}
-                    <button onClick={()=>router.push(`/doctor/patient/${p.id}`)} style={{background:NAVY,color:'white',border:'none',borderRadius:'8px',padding:'6px 10px',fontSize:'10px',fontWeight:700,cursor:'pointer',fontFamily:'DM Sans, sans-serif'}}>
+                    <button onClick={()=>router.push(`/doctor/patient/${p.id}`)} style={{background:NAVY,color:'white',border:'none',borderRadius:'8px',padding:'6px 10px',fontSize:'10px',fontWeight:700,cursor:'pointer',fontFamily:'var(--font-manrope), Manrope, sans-serif'}}>
                       Wè →
                     </button>
                   </div>
@@ -403,13 +409,13 @@ export default function DoctorHome() {
           <div onClick={()=>setShowInvite(false)} style={{position:'fixed',inset:0,background:'rgba(0,0,0,.5)',zIndex:200,backdropFilter:'blur(4px)'}}/>
           <div className="sheet" style={{position:'fixed',bottom:0,left:'50%',transform:'translateX(-50%)',width:'100%',maxWidth:'430px',zIndex:201,background:'white',borderRadius:'24px 24px 0 0',padding:'24px 24px 48px'}}>
             <div style={{width:'36px',height:'4px',background:'rgba(0,0,0,.1)',borderRadius:'2px',margin:'0 auto 20px'}}/>
-            <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'24px',fontWeight:500,color:NAVY,marginBottom:'5px'}}>Ajoute yon pasyan</div>
+            <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'24px',fontWeight:700,color:NAVY,marginBottom:'5px'}}>Ajoute yon pasyan</div>
             <div style={{fontSize:'13px',color:'#6B7A90',marginBottom:'24px',lineHeight:1.6}}>Y ap resevwa yon lyen WhatsApp pou kreye kont yo.</div>
 
             {inviteSent ? (
               <div style={{textAlign:'center',padding:'20px 0'}}>
-                <div style={{fontSize:'40px',marginBottom:'12px'}}>✅</div>
-                <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'20px',fontWeight:500,color:TEAL}}>Envitasyon voye !</div>
+                <div style={{marginBottom:'12px',display:'flex',justifyContent:'center'}}><CircleCheck size={40} strokeWidth={1.9} color={TEAL} /></div>
+                <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'20px',fontWeight:700,color:TEAL}}>Envitasyon voye !</div>
                 <div style={{fontSize:'13px',color:'#6B7A90',marginTop:'6px'}}>Lyen WhatsApp voye bay {inviteName}</div>
               </div>
             ) : (
@@ -417,7 +423,7 @@ export default function DoctorHome() {
                 {/* Name */}
                 <div style={{marginBottom:'12px'}}>
                   <div style={{fontSize:'11px',fontWeight:700,letterSpacing:'1px',color:'#6B7A90',textTransform:'uppercase',marginBottom:'6px'}}>Non pasyan an</div>
-                  <input value={inviteName} onChange={e=>setInviteName(e.target.value)} placeholder="Ex: Marie Jean" style={{width:'100%',border:'1.5px solid rgba(27,42,74,.15)',borderRadius:'12px',padding:'13px 16px',fontSize:'15px',color:NAVY,fontFamily:'DM Sans, sans-serif',outline:'none'}}/>
+                  <input value={inviteName} onChange={e=>setInviteName(e.target.value)} placeholder="Ex: Marie Jean" style={{width:'100%',border:'1.5px solid rgba(27,42,74,.15)',borderRadius:'12px',padding:'13px 16px',fontSize:'15px',color:NAVY,fontFamily:'var(--font-manrope), Manrope, sans-serif',outline:'none'}}/>
                 </div>
                 {/* Phone */}
                 <div style={{marginBottom:'12px'}}>
@@ -429,13 +435,13 @@ export default function DoctorHome() {
                   <div style={{fontSize:'11px',fontWeight:700,letterSpacing:'1px',color:'#6B7A90',textTransform:'uppercase',marginBottom:'8px'}}>Kondisyon</div>
                   <div style={{display:'flex',gap:'6px',flexWrap:'wrap'}}>
                     {['HTA','Dyabèt','HTA + Dyabèt','Lòt'].map(c=>(
-                      <button key={c} onClick={()=>setInviteCond(c)} style={{padding:'8px 14px',borderRadius:'20px',fontSize:'12px',fontWeight:600,cursor:'pointer',fontFamily:'DM Sans, sans-serif',border:`1px solid ${inviteCond===c?TEAL:'rgba(27,42,74,.15)'}`,background:inviteCond===c?'rgba(10,122,106,.08)':'white',color:inviteCond===c?TEAL:'#6B7A90',transition:'all .15s'}}>
+                      <button key={c} onClick={()=>setInviteCond(c)} style={{padding:'8px 14px',borderRadius:'20px',fontSize:'12px',fontWeight:600,cursor:'pointer',fontFamily:'var(--font-manrope), Manrope, sans-serif',border:`1px solid ${inviteCond===c?TEAL:'rgba(27,42,74,.15)'}`,background:inviteCond===c?'rgba(10,122,106,.08)':'white',color:inviteCond===c?TEAL:'#6B7A90',transition:'all .15s'}}>
                         {c}
                       </button>
                     ))}
                   </div>
                 </div>
-                <button onClick={handleInvite} disabled={!invitePhone||!inviteName} style={{width:'100%',background:invitePhone&&inviteName?'#25D366':'rgba(27,42,74,.12)',color:invitePhone&&inviteName?'white':'rgba(27,42,74,.35)',border:'none',borderRadius:'14px',padding:'15px',fontSize:'14px',fontWeight:700,cursor:invitePhone&&inviteName?'pointer':'default',fontFamily:'DM Sans, sans-serif',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',transition:'all .2s'}}>
+                <button onClick={handleInvite} disabled={!invitePhone||!inviteName} style={{width:'100%',background:invitePhone&&inviteName?'#25D366':'rgba(27,42,74,.12)',color:invitePhone&&inviteName?'white':'rgba(27,42,74,.35)',border:'none',borderRadius:'14px',padding:'15px',fontSize:'14px',fontWeight:700,cursor:invitePhone&&inviteName?'pointer':'default',fontFamily:'var(--font-manrope), Manrope, sans-serif',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',transition:'all .2s'}}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
                   Voye envitasyon WhatsApp
                 </button>
@@ -448,13 +454,13 @@ export default function DoctorHome() {
       {/* ── TAB BAR ── */}
       <div style={{position:'fixed',bottom:0,left:'50%',transform:'translateX(-50%)',width:'100%',maxWidth:'430px',background:'white',borderTop:'1px solid rgba(27,42,74,.08)',display:'flex',padding:'10px 0 24px',zIndex:50,boxShadow:'0 -4px 20px rgba(0,0,0,.06)'}}>
         {[
-          { key:'patients', label:'Pasyan yo', icon:'👥' },
-          { key:'alerts',   label:'Alèt',      icon:'🔔' },
-          { key:'profile',  label:'Pwofil',    icon:'👨‍⚕️' },
+          { key:'patients', label:'Pasyan yo', Icon:Users },
+          { key:'alerts',   label:'Alèt',      Icon:Bell },
+          { key:'profile',  label:'Pwofil',    Icon:Stethoscope },
         ].map(t=>(
-          <button key={t.key} onClick={()=>setTab(t.key as TabKey)} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:'3px',background:'none',border:'none',cursor:'pointer',fontFamily:'DM Sans, sans-serif',padding:'4px 0'}}>
-            <div style={{width:'48px',height:'28px',borderRadius:'14px',background:tab===t.key?'rgba(27,42,74,.1)':'transparent',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'18px',transition:'background .15s'}}>
-              {t.icon}
+          <button key={t.key} onClick={()=>setTab(t.key as TabKey)} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:'3px',background:'none',border:'none',cursor:'pointer',fontFamily:'var(--font-manrope), Manrope, sans-serif',padding:'4px 0'}}>
+            <div style={{width:'48px',height:'28px',borderRadius:'14px',background:tab===t.key?'rgba(27,42,74,.1)':'transparent',display:'flex',alignItems:'center',justifyContent:'center',transition:'background .15s'}}>
+              <t.Icon size={18} strokeWidth={1.9} color={tab===t.key?NAVY:'#6B7A90'} />
             </div>
             <div style={{fontSize:'10px',fontWeight:tab===t.key?700:500,color:tab===t.key?NAVY:'#6B7A90'}}>
               {t.label}

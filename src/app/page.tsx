@@ -1,355 +1,207 @@
-'use client'
+import { User, Stethoscope, GraduationCap, WifiOff, Wallet, Languages, MapPin, Sparkles, Users } from "lucide-react";
+import Atom from "@/components/Atom";
+import CardPattern from "@/components/CardPattern";
+import Nav from "@/components/Nav";
+import Footer from "@/components/Footer";
+import SiteEffects from "@/components/SiteEffects";
 
-import { useEffect, useRef } from 'react'
+const products = [
+  { k: "Care", href: "/care", accent: "var(--care)", sq: ["#12A074", "#0A5E43"], role: "Patients · Familles", chip: "Bientôt", price: "Dès 1 500 HTG / trimestre", desc: "Suivi des maladies chroniques (HTA, diabète) et de la grossesse. Le médecin voit vos chiffres entre les visites — alertes à la famille en cas d'anomalie." },
+  { k: "Edu", href: "/edu", accent: "var(--edu)", sq: ["#3470EE", "#1B3F9E"], role: "Concours Médecine", chip: "Janv. 2027", price: "3 500 HTG / saison", desc: "Préparation aux concours FMP/UNDH/UNIFA. 10 000+ questions validées, micro-leçons, explications en créole, hors ligne complet." },
+  { k: "Clinic Academy", href: "/academy", accent: "var(--acad)", sq: ["#7350EA", "#3F2A9E"], role: "Formation continue", chip: "À venir", price: "Certifiant", desc: "ECG, radiologie pulmonaire, cas cliniques simulés par IA. Certificat avec QR Code de vérification valable 2 ans." },
+  { k: "Shift", href: "/shift", accent: "var(--shift)", sq: ["#ED6A3A", "#B23E1C"], role: "Internes · Soignants", chip: "Beta", price: "Gratuit — toujours", desc: "Carnet de garde intelligent : organise vos patients, envoie les alertes de suivi, et regroupe les calculateurs cliniques essentiels." },
+];
 
 export default function Home() {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-
-  // OFFLINE BANNER + NAV SCROLL + MOLECULE CANVAS
-  useEffect(() => {
-    const banner = document.getElementById('offline-banner')
-    const bannerMsg = document.getElementById('banner-msg')
-    let bannerTimer: ReturnType<typeof setTimeout>
-
-    function showBanner(msg: string, cls: string, autohide: boolean) {
-      clearTimeout(bannerTimer)
-      if (bannerMsg) bannerMsg.textContent = msg
-      if (banner) banner.className = 'show ' + cls
-      if (autohide) bannerTimer = setTimeout(() => { if (banner) banner.className = '' }, 2800)
-    }
-    const handleOffline = () => showBanner('✓ Mode hors ligne actif — tout le contenu est disponible', 'is-offline', false)
-    const handleOnline  = () => showBanner('● Connexion rétablie', 'is-online', true)
-    window.addEventListener('offline', handleOffline)
-    window.addEventListener('online',  handleOnline)
-
-    // NAV SCROLL
-    const nav = document.getElementById('nav')
-    const handleScroll = () => { if (nav) nav.classList.toggle('scrolled', window.scrollY > 50) }
-    window.addEventListener('scroll', handleScroll, { passive: true })
-
-    // MOLECULE CANVAS
-    const cvs = canvasRef.current
-    if (!cvs) return
-    const ctx = cvs.getContext('2d')
-    if (!ctx) return
-    let nodes: { x: number; y: number; vx: number; vy: number; r: number }[] = []
-    let raf: number
-    let W = 0, H = 0
-
-    function resize() { W = cvs!.width = cvs!.offsetWidth; H = cvs!.height = cvs!.offsetHeight }
-    function init() {
-      nodes = []
-      const count = Math.min(30, Math.floor(W * H / 16000))
-      for (let i = 0; i < count; i++) {
-        nodes.push({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - 0.5) * 0.35, vy: (Math.random() - 0.5) * 0.35, r: Math.random() * 2.2 + 1.4 })
-      }
-    }
-    function tick() {
-      ctx!.clearRect(0, 0, W, H)
-      const MAX = 148
-      for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-          const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y
-          const d = Math.hypot(dx, dy)
-          if (d < MAX) {
-            ctx!.strokeStyle = `rgba(212,168,67,${(1 - d / MAX) * 0.2})`
-            ctx!.lineWidth = 0.9
-            ctx!.beginPath(); ctx!.moveTo(nodes[i].x, nodes[i].y); ctx!.lineTo(nodes[j].x, nodes[j].y); ctx!.stroke()
-          }
-        }
-      }
-      nodes.forEach(n => {
-        ctx!.fillStyle = 'rgba(27,42,74,0.14)'
-        ctx!.beginPath(); ctx!.arc(n.x, n.y, n.r, 0, Math.PI * 2); ctx!.fill()
-        n.x += n.vx; n.y += n.vy
-        if (n.x < 0 || n.x > W) n.vx *= -1
-        if (n.y < 0 || n.y > H) n.vy *= -1
-      })
-      raf = requestAnimationFrame(tick)
-    }
-
-    resize(); init()
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (!reduced) tick()
-
-    const handleResize = () => { resize(); init() }
-    window.addEventListener('resize', handleResize, { passive: true })
-    const handleVisibility = () => { if (document.hidden) cancelAnimationFrame(raf); else if (!reduced) tick() }
-    document.addEventListener('visibilitychange', handleVisibility)
-
-    return () => {
-      cancelAnimationFrame(raf)
-      window.removeEventListener('offline', handleOffline)
-      window.removeEventListener('online',  handleOnline)
-      window.removeEventListener('scroll',  handleScroll)
-      window.removeEventListener('resize',  handleResize)
-      document.removeEventListener('visibilitychange', handleVisibility)
-    }
-  }, [])
-
-  // SCROLL REVEAL + COUNTERS + TOUCH SHIMMER
-  useEffect(() => {
-    const revealObs = new IntersectionObserver((entries) => {
-      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target) } })
-    }, { threshold: 0.1 })
-    document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el))
-
-    function animCount(el: Element, target: number, dur: number) {
-      const t0 = performance.now();
-      (function step(now: number) {
-        const p = Math.min((now - t0) / dur, 1), ep = 1 - Math.pow(1 - p, 3)
-        el.textContent = Math.floor(ep * target).toLocaleString('fr')
-        if (p < 1) requestAnimationFrame(step); else el.textContent = target.toLocaleString('fr')
-      })(t0)
-    }
-    const ctrObs = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          e.target.querySelectorAll('.ctr-val').forEach(el => animCount(el, +(el as HTMLElement).dataset.target!, 1800))
-          ctrObs.unobserve(e.target)
-        }
-      })
-    }, { threshold: 0.25 })
-    const countersEl = document.getElementById('counters')
-    if (countersEl) ctrObs.observe(countersEl)
-
-    document.querySelectorAll('.pcard').forEach(card => {
-      card.addEventListener('touchstart', () => card.classList.add('hover'), { passive: true })
-      card.addEventListener('touchend', () => setTimeout(() => card.classList.remove('hover'), 700), { passive: true })
-    })
-
-    return () => { revealObs.disconnect(); ctrObs.disconnect() }
-  }, [])
-
-  const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
-
-  // BOHR ATOM SVG — réutilisable
-  const BohrSVG = ({ size }: { size: number }) => (
-    <svg width={size} height={size} viewBox="0 0 160 160" fill="none" aria-hidden="true">
-      <g transform="rotate(-20, 80, 80)">
-        <ellipse cx="80" cy="80" rx="68" ry="48" fill="none" stroke="#D4A843" strokeWidth="1.6"/>
-        <circle cx="148" cy="80"  r="6" fill="#1B2A4A"/>
-        <circle cx="114" cy="121" r="6" fill="#1B2A4A"/>
-        <circle cx="46"  cy="121" r="6" fill="#1B2A4A"/>
-        <circle cx="12"  cy="80"  r="6" fill="#1B2A4A"/>
-        <circle cx="46"  cy="39"  r="6" fill="#1B2A4A"/>
-        <circle cx="114" cy="39"  r="6" fill="#1B2A4A"/>
-      </g>
-      <circle cx="80" cy="80" r="36" fill="none" stroke="#D4A843" strokeWidth="1.6"/>
-      <circle cx="80" cy="44"  r="6" fill="#1B2A4A"/>
-      <circle cx="80" cy="116" r="6" fill="#1B2A4A"/>
-      <circle cx="80" cy="80"  r="18" fill="#1B2A4A"/>
-    </svg>
-  )
-
   return (
-    <>
-      {/* OFFLINE BANNER */}
-      <div id="offline-banner">
-        <span id="banner-msg">✓ Mode hors ligne actif — tout le contenu est disponible</span>
-      </div>
+    <div className="osite">
+      <Nav />
 
-      {/* NAV */}
-      <nav id="nav">
-        <a href="#" className="logo-wrap">
-          <svg width="38" height="38" viewBox="0 0 160 160" fill="none" aria-label="Logo OxyGen">
-            <g transform="rotate(-20, 80, 80)">
-              <ellipse cx="80" cy="80" rx="68" ry="48" fill="none" stroke="#D4A843" strokeWidth="3"/>
-              <circle cx="148" cy="80"  r="8" fill="#1B2A4A"/>
-              <circle cx="114" cy="121" r="8" fill="#1B2A4A"/>
-              <circle cx="46"  cy="121" r="8" fill="#1B2A4A"/>
-              <circle cx="12"  cy="80"  r="8" fill="#1B2A4A"/>
-              <circle cx="46"  cy="39"  r="8" fill="#1B2A4A"/>
-              <circle cx="114" cy="39"  r="8" fill="#1B2A4A"/>
-            </g>
-            <circle cx="80" cy="80" r="36" fill="none" stroke="#D4A843" strokeWidth="3"/>
-            <circle cx="80" cy="44"  r="8" fill="#1B2A4A"/>
-            <circle cx="80" cy="116" r="8" fill="#1B2A4A"/>
-            <circle cx="80" cy="80"  r="20" fill="#1B2A4A"/>
-          </svg>
-          <div>
-            <div className="logo-wordmark">Oxy<em>Gen</em></div>
-            <div className="logo-country">Haïti</div>
-          </div>
-        </a>
-        <ul className="nav-links">
-          <li><a href="#produits">OxyGen Care</a></li>
-          <li><a href="#produits">OxyGen Edu</a></li>
-          <li><a href="#produits">Clinic Academy</a></li>
-          <li><a href="#cta" className="nav-cta">Accès anticipé</a></li>
-        </ul>
-      </nav>
-
-      {/* HERO */}
-      <section className="hero" id="hero">
-        <canvas ref={canvasRef} id="mol-canvas" />
-        <div className="hero-inner">
-
-          {/* LOGO + WORDMARK */}
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'20px', marginBottom:'36px' }}>
-            <div className="bohr-mark"><BohrSVG size={96} /></div>
-            <div style={{ textAlign:'left', borderLeft:'1.5px solid rgba(212,168,67,0.3)', paddingLeft:'20px' }}>
-              <div style={{ fontFamily:'var(--font-cormorant)', fontSize:'clamp(36px,5vw,56px)', fontWeight:500, color:'#1B2A4A', lineHeight:1 }}>
-                Oxy<span style={{ color:'#D4A843' }}>Gen</span>
-              </div>
-              <div style={{ fontSize:'11px', fontWeight:600, letterSpacing:'3px', textTransform:'uppercase', color:'#6B7280', marginTop:'4px' }}>Haïti</div>
+      <header className="hero">
+        <div className="bg"><img src="/hero-illustration.svg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} /></div>
+        <img className="heroimg" src="/hero.jpg" alt="" />
+        <div className="scrim"></div>
+        <div className="hero-mark" aria-hidden="true"><Atom size={520} mode="navy" animate /></div>
+        <div className="wrap heroin">
+          <div className="herocontent">
+            <span className="eyebrow">MedTech · EdTech · 100% Haïti</span>
+            <h1>L&apos;écosystème de santé <span className="g">numérique</span> haïtien.</h1>
+            <p className="lead">Un seul objectif : former, suivre et connecter — pensé pour les conditions réelles d&apos;Haïti. Hors ligne, du français au kreyòl.</p>
+            <div className="cta">
+              <a href="#produits" className="btn btn-gold">Découvrir les produits <span className="arw">→</span></a>
+              <a href="#acces" className="btn btn-outline">Rejoindre l&apos;accès anticipé</a>
             </div>
+            <div className="trust"><span>Offline-first</span><span>MonCash · Natcash</span><span>Français · Kreyòl</span><span>Mobile-first</span></div>
           </div>
+        </div>
+      </header>
 
-          <p className="hero-eyebrow">MedTech · EdTech · Haïti</p>
-          <h1 className="hero-title">Former · Faciliter · <em>Connecter</em></h1>
-          <p className="hero-sub">Construit pour les conditions les plus exigeantes.</p>
+      <section className="statsband"><div className="wrap">
+        <div className="stats">
+          <div className="s" data-reveal=""><div className="n">+2,5<b>M</b></div><div className="l">Haïtiens avec HTA ou diabète, peu suivis</div></div>
+          <div className="s" data-reveal=""><div className="n">480</div><div className="l">Décès maternels / 100 000 — 1er des Amériques</div></div>
+          <div className="s" data-reveal=""><div className="n">8 000</div><div className="l">Candidats aux concours de Médecine / an</div></div>
+          <div className="s" data-reveal=""><div className="n"><b>1er</b></div><div className="l">écosystème de santé numérique 100% haïtien</div></div>
+        </div>
+      </div></section>
 
-          <div className="hero-ctas">
-            <button className="btn-primary" onClick={() => scrollTo('cta')}>
-              Rejoindre la liste d&apos;attente OxyGen Edu
-            </button>
-            <button className="btn-ghost" onClick={() => scrollTo('produits')}>
-              Voir les produits →
-            </button>
+      <section className="audience" id="vous-etes">
+        <div className="wrap">
+          <div className="stitle" data-reveal=""><div className="kick">Pour qui ?</div><h2>Trouvez votre espace.</h2><p>Patient, médecin ou futur médecin — OxyGen a un parcours pensé pour vous.</p></div>
+          <div className="aud-grid">
+            <a href="/care" className="aud" data-reveal="">
+              <span className="bar" style={{ background: "var(--care)" }}></span>
+              <div className="ic" style={{ background: "linear-gradient(145deg,#12A074,#0A5E43)" }}><User size={24} color="#fff" /></div>
+              <h3>Patient ou proche</h3>
+              <p>Suivez votre tension, votre diabète ou votre grossesse, et restez relié à votre médecin — même hors ligne.</p>
+              <span className="go" style={{ color: "var(--care)" }}>OxyGen Care →</span>
+            </a>
+            <a href="/care" className="aud" data-reveal="">
+              <span className="bar" style={{ background: "var(--gold)" }}></span>
+              <div className="ic" style={{ background: "linear-gradient(145deg,#2E4575,#16213A)" }}><Stethoscope size={24} color="#fff" /></div>
+              <h3>Médecin ou soignant</h3>
+              <p>Suivez vos patients entre les visites, gérez vos gardes et formez-vous en continu.</p>
+              <span className="go" style={{ color: "#1B2A4A" }}>Care · Shift · Academy →</span>
+            </a>
+            <a href="/edu" className="aud" data-reveal="">
+              <span className="bar" style={{ background: "var(--edu)" }}></span>
+              <div className="ic" style={{ background: "linear-gradient(145deg,#3470EE,#1B3F9E)" }}><GraduationCap size={24} color="#fff" /></div>
+              <h3>Étudiant en médecine</h3>
+              <p>Préparez les concours FMP/UNDH/UNIFA avec 10 000+ questions validées et des explications en créole.</p>
+              <span className="go" style={{ color: "var(--edu)" }}>OxyGen Edu →</span>
+            </a>
           </div>
+        </div>
+      </section>
 
-          <div className="counters-row" id="counters">
-            <div className="ctr">
-              <span className="ctr-num">~<span className="ctr-val" data-target="2">0</span>M</span>
-              <div className="ctr-lbl">haïtiens avec HTA<br/>non contrôlée</div>
+      <section id="produits">
+        <div className="wrap">
+          <div className="stitle" data-reveal=""><div className="kick">L&apos;écosystème OxyGen</div><h2>Des produits complémentaires, un seul écosystème de santé.</h2><p>Du concours de médecine au suivi des patients chroniques — OxyGen couvre toute la chaîne, pour les soignants comme pour les patients.</p></div>
+          <div className="grid4">
+            {products.map((p) => (
+              <a className="pcard" href={p.href} data-reveal="" key={p.k}>
+                <div className="phead" style={{ background: `linear-gradient(135deg,${p.sq[0]},${p.sq[1]})` }}>
+                  <CardPattern />
+                  <div className="picon"><Atom size={50} mode="white" /></div>
+                  <div className="ptitle"><div className="role">{p.role}</div><h3>OxyGen {p.k}</h3></div>
+                  <span className="chip-h">{p.chip}</span>
+                </div>
+                <div className="pbody">
+                  <p>{p.desc}</p>
+                  <div className="meta"><span className="price" style={{ color: p.accent }}>{p.price}</span><span className="more" style={{ color: p.accent }}>En savoir plus <span className="arw">→</span></span></div>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="unique">
+        <div className="wrap">
+          <div className="stitle" data-reveal=""><div className="kick">Ce qui nous rend uniques</div><h2>Pensé pour Haïti, là où les autres ne vont pas.</h2></div>
+          <div className="ugrid">
+            <div className="u" data-reveal=""><div className="ic"><WifiOff size={22} color="#1B2A4A" /></div><h3>Hors ligne d&apos;abord</h3><p>Tout fonctionne sans connexion ; les données se synchronisent dès que le réseau revient.</p></div>
+            <div className="u" data-reveal=""><div className="ic"><Wallet size={22} color="#1B2A4A" /></div><h3>MonCash &amp; Natcash</h3><p>Paiement local intégré, plus la carte bancaire pour la diaspora.</p></div>
+            <div className="u" data-reveal=""><div className="ic"><Languages size={22} color="#1B2A4A" /></div><h3>En créole &amp; français</h3><p>Une interface et des explications dans la langue de chacun.</p></div>
+            <div className="u" data-reveal=""><div className="ic"><MapPin size={22} color="#1B2A4A" /></div><h3>Haïtien de bout en bout</h3><p>Protocoles, prix en HTG, contexte : pensé ici, pas adapté de l&apos;étranger.</p></div>
+            <div className="u" data-reveal=""><div className="ic"><Sparkles size={22} color="#1B2A4A" /></div><h3>IA intégrée</h3><p>Scan d&apos;ordonnances et de feuilles, assistance clinique, transcription vocale.</p></div>
+            <div className="u" data-reveal=""><div className="ic"><Users size={22} color="#1B2A4A" /></div><h3>Équipe haïtienne</h3><p>Des médecins et soignants d&apos;Haïti, pour les réalités d&apos;Haïti.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section className="fsc">
+        <div className="wrap">
+          <div className="stitle" data-reveal=""><div className="kick" style={{ color: "var(--gold-l)" }}>Un écosystème, pas des apps isolées</div><h2>Former · Suivre · Connecter.</h2><p>Trois missions, des produits qui se répondent — du concours de médecine à la pratique quotidienne.</p></div>
+          <div className="fscgrid">
+            <div className="fscol" data-reveal="">
+              <div className="verb">Former</div>
+              <div className="d">Préparer les concours, puis se former tout au long de la carrière.</div>
+              <a className="prod" href="/edu"><span className="dot" style={{ background: "#3470EE" }}></span>OxyGen Edu</a><a className="prod" href="/academy"><span className="dot" style={{ background: "#7350EA" }}></span>Clinic Academy</a>
             </div>
-            <div className="ctr">
-              <span className="ctr-num">+<span className="ctr-val" data-target="500">0</span><span className="ctr-sfx">K</span></span>
-              <div className="ctr-lbl">diabétiques peu<br/>ou pas suivis</div>
+            <div className="fscol" data-reveal="">
+              <div className="verb">Suivre</div>
+              <div className="d">Suivre les patients chroniques et les grossesses, entre les visites.</div>
+              <a className="prod" href="/care"><span className="dot" style={{ background: "#12A074" }}></span>OxyGen Care</a>
             </div>
-            <div className="ctr">
-              <span className="ctr-num" style={{ fontSize:'42px', letterSpacing:'-1px' }}>Jan 2027</span>
-              <div className="ctr-lbl">lancement<br/>OxyGen Edu</div>
+            <div className="fscol" data-reveal="">
+              <div className="verb">Connecter</div>
+              <div className="d">Relier soignants, patients et données — gardes, alertes, outils cliniques.</div>
+              <a className="prod" href="/shift"><span className="dot" style={{ background: "#ED6A3A" }}></span>OxyGen Shift</a>
             </div>
           </div>
         </div>
       </section>
 
-      {/* PRODUCTS */}
-      <section className="products-section" id="produits">
-        <div className="products-header reveal up">
-          <p className="section-label">L&apos;écosystème OxyGen</p>
-          <h2 className="section-title">Quatre produits.<br/>Un seul objectif.</h2>
-          <div className="gold-rule"></div>
-        </div>
-        <div className="products-grid">
-
-          <div className="pcard reveal left" style={{ transitionDelay:'.05s' }}>
-            <div className="pcard-icon">
-              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 20c4.97 0 9-4.03 9-9S15.97 2 11 2 2 6.03 2 11s4.03 9 9 9z" stroke="#D4A843" strokeWidth="1.4"/><path d="M11 7v4l2.5 2.5" stroke="#D4A843" strokeWidth="1.4" strokeLinecap="round"/></svg>
-            </div>
-            <span className="pcard-badge">Patients · Familles</span>
-            <h3 className="pcard-title">OxyGen Care</h3>
-            <p className="pcard-desc">Suivi HTA et diabète, alertes famille. Les maladies chroniques suivies en temps réel, même sans connexion.</p>
-            <div className="pcard-foot">
-              <span className="pcard-price">2 000 HTG / 6 mois</span>
-              <div className="pcard-arrow"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2.5 6.5H10.5M10.5 6.5L7 3M10.5 6.5L7 10" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg></div>
-            </div>
-          </div>
-
-          <div className="pcard reveal up" style={{ transitionDelay:'.10s' }}>
-            <div className="pcard-icon">
-              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2L2 6.5 11 11 20 6.5 11 2Z" stroke="#D4A843" strokeWidth="1.4" strokeLinejoin="round"/><path d="M2 15.5L11 20 20 15.5" stroke="#D4A843" strokeWidth="1.4" strokeLinejoin="round"/><path d="M2 11L11 15.5 20 11" stroke="#D4A843" strokeWidth="1.4" strokeLinejoin="round"/></svg>
-            </div>
-            <span className="pcard-badge">Concours Facs de Médecine</span>
-            <h3 className="pcard-title">OxyGen Edu</h3>
-            <p className="pcard-desc">10 000+ questions validées, micro-leçons interactives, mode hors ligne complet. Explications en créole. 4× moins cher et 8× plus long qu&apos;une prépa traditionnelle.</p>
-            <div className="pcard-foot">
-              <span className="pcard-price">3 500 HTG / saison</span>
-              <div className="pcard-arrow"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2.5 6.5H10.5M10.5 6.5L7 3M10.5 6.5L7 10" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg></div>
-            </div>
-          </div>
-
-          <div className="pcard reveal up" style={{ transitionDelay:'.15s' }}>
-            <div className="pcard-icon">
-              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M19.5 4.3a5 5 0 0 0-7.07 0L11 5.73l-1.43-1.43a5 5 0 0 0-7.07 7.07l1.43 1.43L11 20.2l7.07-7.07 1.43-1.43a5 5 0 0 0 0-7.07z" stroke="#D4A843" strokeWidth="1.4" strokeLinejoin="round"/></svg>
-            </div>
-            <span className="pcard-badge">Formations certifiantes</span>
-            <h3 className="pcard-title">Clinic Academy</h3>
-            <p className="pcard-desc">ECG, Radio Pulmonaire, cas cliniques simulés par IA. Certificat avec QR Code de vérification valable 2 ans.</p>
-            <div className="pcard-foot">
-              <span className="pcard-price">Lancement oct. 2027</span>
-              <div className="pcard-arrow"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2.5 6.5H10.5M10.5 6.5L7 3M10.5 6.5L7 10" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg></div>
-            </div>
-          </div>
-
-          <div className="pcard reveal right" style={{ transitionDelay:'.20s' }}>
-            <div className="pcard-icon">
-              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h8a2 2 0 0 1 2 2v4M9 3v18m0 0h8a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h16" stroke="#0F6E56" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </div>
-            <span className="pcard-badge pcard-free">Gratuit · Médecins · Internes · Infirmières</span>
-            <h3 className="pcard-title">Shift + Clinical Tools</h3>
-            <p className="pcard-desc">Shift organise vos patients et envoie les alertes de suivi. Les Clinical Tools ajoutent les calculateurs essentiels — scores, dosages, conversions. Gratuit, offline, pour ceux qui soignent.</p>
-            <div className="pcard-foot">
-              <span className="pcard-price free">Gratuit — toujours</span>
-              <div className="pcard-arrow"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2.5 6.5H10.5M10.5 6.5L7 3M10.5 6.5L7 10" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg></div>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      {/* POURQUOI OXYGEN EXISTE */}
-      <section className="why-section">
-        <div className="why-header reveal up">
-          <p className="section-label">Notre point de départ</p>
-          <h2 className="section-title">Pourquoi OxyGen existe</h2>
-          <div className="gold-rule"></div>
-        </div>
-        <div className="why-grid">
-          <div className="why-card reveal left" style={{ transitionDelay:'.05s' }}>
-            <span className="why-product">OxyGen Edu</span>
-            <span className="why-stat">4× moins cher</span>
-            <span className="why-stat-sub">8× plus long</span>
-            <p className="why-desc">qu&apos;une préparation traditionnelle de 5 semaines — pour 8 mois d&apos;accompagnement structuré aux concours des facultés de médecine.</p>
-          </div>
-          <div className="why-card reveal right" style={{ transitionDelay:'.10s' }}>
-            <span className="why-product">OxyGen Care</span>
-            <span className="why-stat">+2,5M</span>
-            <p className="why-desc">haïtiens vivant avec l&apos;hypertension artérielle ou le diabète, insuffisamment pris en charge faute d&apos;outils de suivi accessibles.</p>
-          </div>
-          <div className="why-card reveal left" style={{ transitionDelay:'.15s' }}>
-            <span className="why-product">OxyGen Shift · Clinical Tools</span>
-            <span className="why-stat">TROP PEU</span>
-            <p className="why-desc">de professionnels de santé haïtiens utilisent un outil clinique numérique adapté à leurs conditions de travail réelles.</p>
-          </div>
-          <div className="why-card reveal right" style={{ transitionDelay:'.20s' }}>
-            <span className="why-product">Vision 2035</span>
-            <span className="why-stat">Quasi-inexistantes</span>
-            <p className="why-desc">les données structurées sur l&apos;écosystème de santé haïtien — disponibles pour la recherche, la politique de santé publique, et la communauté scientifique internationale.</p>
+      <section id="pourquoi" className="why">
+        <div className="wrap">
+          <div className="stitle" data-reveal=""><div className="kick">Pourquoi OxyGen existe</div><h2>Un vide que personne d&apos;autre ne comble.</h2>
+            <p>Aucune plateforme numérique haïtienne n&apos;existait pour résoudre ces problèmes. Nous les prenons un par un.</p></div>
+          <div className="whygrid">
+            <div className="wc" data-reveal=""><div className="big">30<b>%</b></div><div className="t">des adultes haïtiens sont hypertendus — la majorité l&apos;ignore.</div></div>
+            <div className="wc" data-reveal=""><div className="big">95<b>%</b></div><div className="t">des candidats aux Facs de Médecine échouent, souvent faute de préparation structurée.</div></div>
+            <div className="wc" data-reveal=""><div className="big">4×</div><div className="t">moins cher et 8× plus long qu&apos;une prépa traditionnelle de 5 semaines.</div></div>
+            <div className="wc" data-reveal=""><div className="big">2035</div><div className="t">des données de santé structurées pour la recherche et la politique publique.</div></div>
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="cta-section reveal up" id="cta">
-        <p className="section-label">Accès anticipé</p>
-        <h2 className="cta-title">Soyez parmi les premiers<br/>à accéder à <em>OxyGen Edu</em></h2>
-        <p className="cta-sub">Lancement janvier 2027. Inscrivez-vous pour être notifié en priorité et accéder aux offres de lancement.</p>
-        <div className="cta-form">
-          <input className="cta-input" type="email" placeholder="votre@email.com"/>
-          <button className="cta-btn">Je m&apos;inscris →</button>
-        </div>
-        <div className="tags-row">
-          <span className="tag">Offline first</span>
-          <span className="tag">MonCash</span>
-          <span className="tag">Natcash</span>
-          <span className="tag">En créole</span>
-          <span className="tag">Mobile first</span>
+      <section className="quote">
+        <div className="wrap"><div className="box" data-reveal="">
+          <div className="portrait" id="portrait">
+            <img src="/leo_pho.jpg" alt="Dr Ewald Osias" style={{ position: "absolute", inset: 0, zIndex: 2 }} />
+            <div className="ph"><div className="in">EO</div><div className="lb">Votre photo ici</div></div>
+          </div>
+          <div className="qtext">
+            <div className="qmark">&ldquo;</div>
+            <blockquote>Trop de patients sont seuls ; trop d&apos;étudiants brillants échouent faute d&apos;outils. OxyGen relie les soignants, les patients et les futurs médecins — un écosystème de santé pensé en Haïti, de bout en bout.</blockquote>
+            <div className="who">Dr Ewald Osias</div>
+            <div className="role">Médecin · Fondateur &amp; CEO, OxyGen Haïti</div>
+          </div>
+        </div></div>
+      </section>
+
+      <section className="news" id="veille">
+        <div className="wrap">
+          <div className="topbar" data-reveal="">
+            <div className="stitle" style={{ textAlign: "left", margin: 0, maxWidth: "none" }}><div className="kick">Veille santé</div><h2 style={{ fontSize: 32 }}>Haïti &amp; monde</h2></div>
+            <a href="#">Toute la veille →</a>
+          </div>
+          <div className="ngrid">
+            <article className="ncard" data-reveal="">
+              <div className="nimg" style={{ background: "linear-gradient(135deg,#2E4575,#16213A)" }}><span className="ncat" style={{ color: "#1B2A4A" }}>Monde · OMS</span></div>
+              <div className="nbody"><div className="ndate">Juin 2026</div><h3>Hypertension : l&apos;OMS actualise ses recommandations de prise en charge</h3><p>De nouveaux seuils et un suivi renforcé pour réduire les complications cardiovasculaires.</p><span className="read">Lire →</span></div>
+            </article>
+            <article className="ncard" data-reveal="">
+              <div className="nimg" style={{ background: "linear-gradient(135deg,#12A074,#0A5E43)" }}><span className="ncat" style={{ color: "#0E8A5F" }}>Caraïbes · PAHO</span></div>
+              <div className="nbody"><div className="ndate">Mai 2026</div><h3>Mortalité maternelle dans les Caraïbes : Haïti reste la priorité</h3><p>Surveillance de la pré-éclampsie et suivi prénatal au cœur des plans régionaux.</p><span className="read">Lire →</span></div>
+            </article>
+            <article className="ncard" data-reveal="">
+              <div className="nimg" style={{ background: "linear-gradient(135deg,#ED6A3A,#B23E1C)" }}><span className="ncat" style={{ color: "#CC4E22" }}>Haïti · MSPP</span></div>
+              <div className="nbody"><div className="ndate">Avril 2026</div><h3>Maladies chroniques : vers un meilleur suivi des patients en Haïti</h3><p>Le numérique identifié comme levier pour relier patients et soignants entre les visites.</p><span className="read">Lire →</span></div>
+            </article>
+          </div>
+          <p className="note">Exemples de mise en page — les articles réels seront branchés sur des sources (OMS, PAHO, MSPP…) à l&apos;intégration.</p>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer>
-        <div className="footer-brand">Oxy<em>Gen</em> Haïti</div>
-        <p className="footer-copy">© 2026 OxyGen Haiti S.A. · Port-au-Prince, Haïti</p>
-        <div className="footer-links">
-          <a href="#">Confidentialité</a>
-          <a href="#">Contact</a>
-          <a href="#">Investisseurs</a>
-        </div>
-      </footer>
-    </>
-  )
+      <section className="ctaband" id="acces">
+        <div className="wrap"><div className="box">
+          <div className="inner" data-reveal="">
+            <h2>Restez informé. Accédez en premier à <span className="g">OxyGen</span>.</h2>
+            <p>Lancement progressif dès 2026 — et l&apos;essentiel de la e-santé, Haïti &amp; monde, dans votre boîte mail.</p>
+            <div className="signup">
+              <input type="email" placeholder="Votre adresse e-mail" aria-label="Adresse e-mail" />
+              <button className="btn btn-gold" type="button">Je m&apos;inscris <span className="arw">→</span></button>
+            </div>
+            <div className="note">Pas de spam. Désinscription en un clic.</div>
+          </div>
+        </div></div>
+      </section>
+
+      <Footer />
+
+      <SiteEffects />
+    </div>
+  );
 }

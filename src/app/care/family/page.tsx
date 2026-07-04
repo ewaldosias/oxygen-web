@@ -1,8 +1,12 @@
 'use client'
 
+import Grain from '@/components/Grain'
+import { isPreview } from '@/lib/preview'
+
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
+import { Users, User, CircleCheck, Flame, TriangleAlert, Send } from 'lucide-react'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -88,6 +92,7 @@ export default function CareFamily() {
   async function loadData() {
     setLoading(true)
     try {
+      if (isPreview()) { setLoading(false); return }
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
@@ -205,9 +210,10 @@ export default function CareFamily() {
   }
 
   return (
-    <div style={{minHeight:'100vh',background:'#F0F4F9',fontFamily:'DM Sans, sans-serif',paddingBottom:'100px'}}>
+    <div style={{minHeight:'100vh',background:'radial-gradient(115% 78% at 50% -8%,#D6EBCE 0%,#E6F1DC 50%,#DBEBD1 100%)',fontFamily:'var(--font-manrope), Manrope, sans-serif',paddingBottom:'100px'}}>
+      <Grain/>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
         @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
         @keyframes modalIn{from{opacity:0;transform:translateY(100%)}to{opacity:1;transform:translateY(0)}}
         .c1{animation:fadeUp .5s ease .05s forwards;opacity:0}
@@ -232,22 +238,22 @@ export default function CareFamily() {
               <svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M7 1L1 6.5L7 12" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>
             </Link>
             <div style={{flex:1}}>
-              <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'11px',fontWeight:400,color:'rgba(255,255,255,0.5)',letterSpacing:'0.5px',marginBottom:'3px'}}>Oxy<span style={{color:GOLD}}>Gen</span> Care</div>
-              <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'22px',fontWeight:500,color:'white',lineHeight:1}}>Espas Fanmi</div>
+              <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'13px',fontWeight:700,color:'rgba(255,255,255,0.6)',letterSpacing:'0.3px',marginBottom:'4px'}}>Oxy<span style={{color:GOLD}}>Gen</span> Care</div>
+              <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'27px',fontWeight:800,letterSpacing:'-0.5px',color:'white',lineHeight:1.05}}>Espas Fanmi</div>
               <div style={{fontSize:'11px',color:'rgba(255,255,255,0.45)',marginTop:'2px'}}>{userName || 'Pasyan'}</div>
             </div>
             {/* Invite button */}
-            <button onClick={()=>setShowInvite(true)} style={{background:'rgba(212,168,67,0.2)',border:`1px solid ${GOLD}`,borderRadius:'10px',padding:'7px 12px',color:GOLD,fontSize:'11px',fontWeight:700,cursor:'pointer',fontFamily:'DM Sans, sans-serif',display:'flex',alignItems:'center',gap:'5px',flexShrink:0}}>
+            <button onClick={()=>setShowInvite(true)} style={{background:'rgba(212,168,67,0.2)',border:`1px solid ${GOLD}`,borderRadius:'10px',padding:'7px 12px',color:GOLD,fontSize:'11px',fontWeight:700,cursor:'pointer',fontFamily:'var(--font-manrope), Manrope, sans-serif',display:'flex',alignItems:'center',gap:'5px',flexShrink:0}}>
               + Envite
             </button>
           </div>
 
           {/* Tab toggle */}
           <div style={{display:'flex',gap:'6px'}}>
-            <button className="tb" onClick={()=>setTab('monitor')} style={{flex:1,padding:'9px',borderRadius:'12px',fontSize:'12px',fontWeight:700,fontFamily:'DM Sans, sans-serif',border:`1px solid ${tab==='monitor'?GOLD:'rgba(255,255,255,0.15)'}`,background:tab==='monitor'?'rgba(212,168,67,0.2)':'rgba(255,255,255,0.08)',color:tab==='monitor'?GOLD:'rgba(255,255,255,0.55)',transition:'all .2s'}}>
+            <button className="tb" onClick={()=>setTab('monitor')} style={{flex:1,padding:'9px',borderRadius:'12px',fontSize:'12px',fontWeight:700,fontFamily:'var(--font-manrope), Manrope, sans-serif',border:`1px solid ${tab==='monitor'?GOLD:'rgba(255,255,255,0.15)'}`,background:tab==='monitor'?'rgba(212,168,67,0.2)':'rgba(255,255,255,0.08)',color:tab==='monitor'?GOLD:'rgba(255,255,255,0.55)',transition:'all .2s'}}>
               Moun mwen ap swiv ({iMonitor.length})
             </button>
-            <button className="tb" onClick={()=>setTab('myproches')} style={{flex:1,padding:'9px',borderRadius:'12px',fontSize:'12px',fontWeight:700,fontFamily:'DM Sans, sans-serif',border:`1px solid ${tab==='myproches'?'rgba(255,255,255,0.6)':'rgba(255,255,255,0.15)'}`,background:tab==='myproches'?'rgba(255,255,255,0.15)':'rgba(255,255,255,0.08)',color:tab==='myproches'?'white':'rgba(255,255,255,0.55)',transition:'all .2s'}}>
+            <button className="tb" onClick={()=>setTab('myproches')} style={{flex:1,padding:'9px',borderRadius:'12px',fontSize:'12px',fontWeight:700,fontFamily:'var(--font-manrope), Manrope, sans-serif',border:`1px solid ${tab==='myproches'?'rgba(255,255,255,0.6)':'rgba(255,255,255,0.15)'}`,background:tab==='myproches'?'rgba(255,255,255,0.15)':'rgba(255,255,255,0.08)',color:tab==='myproches'?'white':'rgba(255,255,255,0.55)',transition:'all .2s'}}>
               Moun ki wè done mwen ({myProches.length})
             </button>
           </div>
@@ -267,8 +273,8 @@ export default function CareFamily() {
               <div style={{textAlign:'center',padding:'32px',color:'#6B7A90'}}>N ap chaje...</div>
             ) : iMonitor.length === 0 ? (
               <div style={{textAlign:'center',padding:'40px 20px',color:'#6B7A90'}}>
-                <div style={{fontSize:'36px',marginBottom:'12px'}}>👨‍👩‍👧</div>
-                <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'20px',fontWeight:500,color:NAVY,marginBottom:'8px'}}>Pa gen moun ou ap swiv</div>
+                <div style={{marginBottom:'12px'}}><Users size={36} strokeWidth={1.9} color="#6B7A90" style={{display:'inline-block'}}/></div>
+                <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'20px',fontWeight:700,color:NAVY,marginBottom:'8px'}}>Pa gen moun ou ap swiv</div>
                 <div style={{fontSize:'13px',lineHeight:1.6}}>Mande yon manm fanmi ki itilize OxyGen Care pou envite ou wè done li.</div>
               </div>
             ) : iMonitor.map((m,idx)=>{
@@ -278,7 +284,7 @@ export default function CareFamily() {
                   {/* Member header */}
                   <div style={{background:`linear-gradient(135deg,${NAVY} 0%,#2D4A6B 100%)`,padding:'12px 16px',display:'flex',alignItems:'center',gap:'12px'}}>
                     <div style={{width:'38px',height:'38px',borderRadius:'50%',background:'rgba(255,255,255,0.15)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'18px',flexShrink:0}}>
-                      {m.relationship==='Papa'?'👨':'👩'}
+                      <User size={20} strokeWidth={1.9} color="white"/>
                     </div>
                     <div style={{flex:1}}>
                       <div style={{fontSize:'14px',fontWeight:700,color:'white'}}>{m.name}</div>
@@ -287,7 +293,7 @@ export default function CareFamily() {
                     {m.missingToday ? (
                       <div style={{background:'rgba(192,57,43,0.2)',border:'1px solid rgba(192,57,43,0.4)',borderRadius:'20px',padding:'4px 10px',fontSize:'10px',fontWeight:700,color:'#FF8A8A'}}>Pa antre</div>
                     ) : (
-                      <div style={{background:'rgba(26,138,74,0.2)',border:'1px solid rgba(26,138,74,0.3)',borderRadius:'20px',padding:'4px 10px',fontSize:'10px',fontWeight:700,color:'#6DECB6'}}>Ajou ✓</div>
+                      <div style={{background:'rgba(26,138,74,0.2)',border:'1px solid rgba(26,138,74,0.3)',borderRadius:'20px',padding:'4px 10px',fontSize:'10px',fontWeight:700,color:'#6DECB6',display:'flex',alignItems:'center',gap:'4px'}}>Ajou <CircleCheck size={12} strokeWidth={1.9}/></div>
                     )}
                   </div>
 
@@ -313,7 +319,7 @@ export default function CareFamily() {
                         <div style={{fontSize:'8px',fontWeight:700,letterSpacing:'1px',color:'#6B7A90',textTransform:'uppercase',marginBottom:'4px'}}>SERI</div>
                         <div style={{fontFamily:'DM Mono, monospace',fontSize:'15px',fontWeight:700,color:NAVY,lineHeight:1}}>{m.streak}</div>
                         <div style={{fontSize:'8px',color:'#6B7A90',marginTop:'2px'}}>jou</div>
-                        <div style={{fontSize:'9px',fontWeight:700,color:GOLD,marginTop:'2px'}}>🔥 Rekò</div>
+                        <div style={{fontSize:'9px',fontWeight:700,color:GOLD,marginTop:'2px',display:'flex',alignItems:'center',justifyContent:'center',gap:'3px'}}><Flame size={11} strokeWidth={1.9}/> Rekò</div>
                       </div>
                     </div>
 
@@ -321,12 +327,12 @@ export default function CareFamily() {
                     <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
                       <div style={{fontSize:'11px',color:'#6B7A90'}}>Dènye antre : <span style={{fontWeight:600,color:NAVY}}>{m.lastEntry}</span></div>
                       {m.taStatus==='alert' && (
-                        <div style={{fontSize:'10px',fontWeight:700,color:'#C0392B',background:'rgba(192,57,43,0.08)',padding:'3px 9px',borderRadius:'20px'}}>⚠ Tansyon wo anpil</div>
+                        <div style={{fontSize:'10px',fontWeight:700,color:'#C0392B',background:'rgba(192,57,43,0.08)',padding:'3px 9px',borderRadius:'20px',display:'flex',alignItems:'center',gap:'4px'}}><TriangleAlert size={11} strokeWidth={1.9}/> Tansyon wo anpil</div>
                       )}
                     </div>
 
                     {/* WhatsApp report button */}
-                    <button style={{width:'100%',background:'#25D366',color:'white',border:'none',borderRadius:'11px',padding:'11px',fontFamily:'DM Sans, sans-serif',fontSize:'12px',fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:'7px',marginTop:'12px'}}>
+                    <button style={{width:'100%',background:'#25D366',color:'white',border:'none',borderRadius:'11px',padding:'11px',fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'12px',fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:'7px',marginTop:'12px'}}>
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
                       Voye rapò bay {m.name.split(' ')[0]}
                     </button>
@@ -352,7 +358,7 @@ export default function CareFamily() {
                 {/* Proche header */}
                 <div style={{background:`linear-gradient(135deg,${NAVY} 0%,#2D4A6B 100%)`,padding:'12px 16px',display:'flex',alignItems:'center',gap:'12px'}}>
                   <div style={{width:'36px',height:'36px',borderRadius:'50%',background:'rgba(255,255,255,0.15)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'16px',flexShrink:0}}>
-                    {p.relationship==='Fi'?'👩':'👨'}
+                    <User size={20} strokeWidth={1.9} color="white"/>
                   </div>
                   <div style={{flex:1}}>
                     <div style={{fontSize:'13px',fontWeight:700,color:'white'}}>{p.name}</div>
@@ -369,8 +375,8 @@ export default function CareFamily() {
                 <div style={{padding:'13px 16px'}}>
                   {/* Alert history */}
                   {p.lastAlert&&(
-                    <div style={{background:'rgba(224,123,42,0.06)',border:'1px solid rgba(224,123,42,0.15)',borderRadius:'10px',padding:'8px 12px',marginBottom:'11px',fontSize:'11px',color:'#E07B2A',fontWeight:600}}>
-                      📨 {p.lastAlert}
+                    <div style={{background:'rgba(224,123,42,0.06)',border:'1px solid rgba(224,123,42,0.15)',borderRadius:'10px',padding:'8px 12px',marginBottom:'11px',fontSize:'11px',color:'#E07B2A',fontWeight:600,display:'flex',alignItems:'center',gap:'6px'}}>
+                      <Send size={13} strokeWidth={1.9} style={{flexShrink:0}}/> {p.lastAlert}
                     </div>
                   )}
 
@@ -395,11 +401,11 @@ export default function CareFamily() {
 
                   {/* Actions */}
                   <div style={{display:'flex',gap:'8px'}}>
-                    <button style={{flex:1,background:'#25D366',color:'white',border:'none',borderRadius:'10px',padding:'10px',fontFamily:'DM Sans, sans-serif',fontSize:'11px',fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:'5px'}}>
+                    <button style={{flex:1,background:'#25D366',color:'white',border:'none',borderRadius:'10px',padding:'10px',fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'11px',fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:'5px'}}>
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
                       Voye rapò
                     </button>
-                    <button style={{flex:1,background:'rgba(192,57,43,0.07)',color:'#C0392B',border:'1px solid rgba(192,57,43,0.2)',borderRadius:'10px',padding:'10px',fontFamily:'DM Sans, sans-serif',fontSize:'11px',fontWeight:700,cursor:'pointer'}}>
+                    <button style={{flex:1,background:'rgba(192,57,43,0.07)',color:'#C0392B',border:'1px solid rgba(192,57,43,0.2)',borderRadius:'10px',padding:'10px',fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'11px',fontWeight:700,cursor:'pointer'}}>
                       Retire aksè
                     </button>
                   </div>
@@ -408,7 +414,7 @@ export default function CareFamily() {
             ))}
 
             {/* Add proche CTA */}
-            <button onClick={()=>setShowInvite(true)} style={{width:'100%',background:'white',border:`1.5px dashed rgba(27,42,74,0.2)`,borderRadius:'16px',padding:'20px',fontFamily:'DM Sans, sans-serif',fontSize:'13px',fontWeight:600,color:'#6B7A90',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px'}}>
+            <button onClick={()=>setShowInvite(true)} style={{width:'100%',background:'white',border:`1.5px dashed rgba(27,42,74,0.2)`,borderRadius:'16px',padding:'20px',fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'13px',fontWeight:600,color:'#6B7A90',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px'}}>
               <span style={{fontSize:'20px',color:TEAL}}>+</span> Ajoute yon lòt moun
             </button>
           </>
@@ -421,26 +427,26 @@ export default function CareFamily() {
           <div onClick={()=>setShowInvite(false)} style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:200,backdropFilter:'blur(4px)'}}/>
           <div className="modal-in" style={{position:'fixed',bottom:0,left:'50%',transform:'translateX(-50%)',width:'100%',maxWidth:'430px',zIndex:201,background:'white',borderRadius:'24px 24px 0 0',padding:'24px 24px 48px'}}>
             <div style={{width:'36px',height:'4px',background:'rgba(0,0,0,0.1)',borderRadius:'2px',margin:'0 auto 20px'}}/>
-            <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'24px',fontWeight:500,color:NAVY,marginBottom:'5px'}}>Envite yon manm fanmi</div>
+            <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'24px',fontWeight:700,color:NAVY,marginBottom:'5px'}}>Envite yon manm fanmi</div>
             <div style={{fontSize:'13px',color:'#6B7A90',marginBottom:'24px',lineHeight:1.6}}>Y ap resevwa yon lyen WhatsApp pou aksepte wè done ou yo.</div>
 
             {inviteSent ? (
               <div style={{textAlign:'center',padding:'20px 0'}}>
-                <div style={{fontSize:'40px',marginBottom:'12px'}}>✅</div>
-                <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'20px',fontWeight:500,color:TEAL}}>Envitasyon voye !</div>
+                <div style={{marginBottom:'12px'}}><CircleCheck size={40} strokeWidth={1.9} color={TEAL} style={{display:'inline-block'}}/></div>
+                <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'20px',fontWeight:700,color:TEAL}}>Envitasyon voye !</div>
                 <div style={{fontSize:'13px',color:'#6B7A90',marginTop:'6px'}}>Lyen WhatsApp voye bay {inviteName}</div>
               </div>
             ) : (
               <>
                 <div style={{marginBottom:'12px'}}>
                   <div style={{fontSize:'11px',fontWeight:700,letterSpacing:'1px',color:'#6B7A90',textTransform:'uppercase',marginBottom:'6px'}}>Prenon</div>
-                  <input value={inviteName} onChange={e=>setInviteName(e.target.value)} placeholder="Ex: Josette" style={{width:'100%',border:'1.5px solid rgba(27,42,74,0.15)',borderRadius:'12px',padding:'13px 16px',fontSize:'15px',color:NAVY,fontFamily:'DM Sans, sans-serif',transition:'border-color .2s,box-shadow .2s'}}/>
+                  <input value={inviteName} onChange={e=>setInviteName(e.target.value)} placeholder="Ex: Josette" style={{width:'100%',border:'1.5px solid rgba(27,42,74,0.15)',borderRadius:'12px',padding:'13px 16px',fontSize:'15px',color:NAVY,fontFamily:'var(--font-manrope), Manrope, sans-serif',transition:'border-color .2s,box-shadow .2s'}}/>
                 </div>
                 <div style={{marginBottom:'12px'}}>
                   <div style={{fontSize:'11px',fontWeight:700,letterSpacing:'1px',color:'#6B7A90',textTransform:'uppercase',marginBottom:'6px'}}>Relasyon</div>
                   <div style={{display:'flex',gap:'6px',flexWrap:'wrap'}}>
                     {['Fi','Pitit gason','Manman','Papa','Frè','Sè','Lòt'].map(r=>(
-                      <button key={r} onClick={()=>setInviteRel(r)} style={{padding:'7px 13px',borderRadius:'20px',fontSize:'12px',fontWeight:600,cursor:'pointer',fontFamily:'DM Sans, sans-serif',border:`1px solid ${inviteRel===r?TEAL:'rgba(27,42,74,0.15)'}`,background:inviteRel===r?'rgba(10,122,106,0.08)':'white',color:inviteRel===r?TEAL:'#6B7A90',transition:'all .15s'}}>
+                      <button key={r} onClick={()=>setInviteRel(r)} style={{padding:'7px 13px',borderRadius:'20px',fontSize:'12px',fontWeight:600,cursor:'pointer',fontFamily:'var(--font-manrope), Manrope, sans-serif',border:`1px solid ${inviteRel===r?TEAL:'rgba(27,42,74,0.15)'}`,background:inviteRel===r?'rgba(10,122,106,0.08)':'white',color:inviteRel===r?TEAL:'#6B7A90',transition:'all .15s'}}>
                         {r}
                       </button>
                     ))}
@@ -450,7 +456,7 @@ export default function CareFamily() {
                   <div style={{fontSize:'11px',fontWeight:700,letterSpacing:'1px',color:'#6B7A90',textTransform:'uppercase',marginBottom:'6px'}}>Nimewo telefòn</div>
                   <input value={invitePhone} onChange={e=>setInvitePhone(e.target.value)} placeholder="+509 XXXX XXXX" type="tel" style={{width:'100%',border:'1.5px solid rgba(27,42,74,0.15)',borderRadius:'12px',padding:'13px 16px',fontSize:'15px',color:NAVY,fontFamily:'DM Mono, monospace',letterSpacing:'1px',transition:'border-color .2s,box-shadow .2s'}}/>
                 </div>
-                <button onClick={handleInvite} disabled={!invitePhone||!inviteName} style={{width:'100%',background:invitePhone&&inviteName?'#25D366':'rgba(27,42,74,0.12)',color:invitePhone&&inviteName?'white':'rgba(27,42,74,0.35)',border:'none',borderRadius:'14px',padding:'15px',fontSize:'14px',fontWeight:700,cursor:invitePhone&&inviteName?'pointer':'default',fontFamily:'DM Sans, sans-serif',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',transition:'all .2s'}}>
+                <button onClick={handleInvite} disabled={!invitePhone||!inviteName} style={{width:'100%',background:invitePhone&&inviteName?'#25D366':'rgba(27,42,74,0.12)',color:invitePhone&&inviteName?'white':'rgba(27,42,74,0.35)',border:'none',borderRadius:'14px',padding:'15px',fontSize:'14px',fontWeight:700,cursor:invitePhone&&inviteName?'pointer':'default',fontFamily:'var(--font-manrope), Manrope, sans-serif',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',transition:'all .2s'}}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
                   Voye envitasyon WhatsApp
                 </button>

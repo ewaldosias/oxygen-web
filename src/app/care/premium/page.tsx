@@ -1,7 +1,10 @@
 'use client'
 
+import Grain from '@/components/Grain'
+
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { Smartphone, FileText, Users, TrendingUp, Target, Dna, Star, Gift, Globe, Check, CircleCheck } from 'lucide-react'
 
 const TEAL = '#0A7A6A'
 const NAVY = '#1B2A4A'
@@ -34,12 +37,12 @@ type Plan    = 'haiti' | 'diaspora'
 type Payment = 'moncash' | 'natcash' | 'card' | 'zelle' | 'cashapp'
 
 const FEATURES = [
-  { icon:'📱', label:'Alèt WhatsApp + SMS an tan reyèl' },
-  { icon:'📄', label:'Rapò PDF pou doktè ou' },
-  { icon:'👨‍👩‍👧', label:'Espas fanmi + diaspora' },
-  { icon:'📈', label:'Istorik 12 mwa' },
-  { icon:'🎯', label:'Sèy alèt pèsonalize' },
-  { icon:'🧬', label:'HbA1c estimé otomatik' },
+  { Icon: Smartphone, label:'Alèt WhatsApp + SMS an tan reyèl' },
+  { Icon: FileText,   label:'Rapò PDF pou doktè ou' },
+  { Icon: Users,      label:'Espas fanmi + diaspora' },
+  { Icon: TrendingUp, label:'Istorik 12 mwa' },
+  { Icon: Target,     label:'Sèy alèt pèsonalize' },
+  { Icon: Dna,        label:'HbA1c estimé otomatik' },
 ]
 
 export default function CarePremium() {
@@ -76,9 +79,10 @@ export default function CarePremium() {
   const payLabel   = payment==='moncash' ? 'MonCash' : payment==='natcash' ? 'Natcash' : payment==='card' ? 'Kat Kredi' : payment==='zelle' ? 'Zelle' : 'CashApp'
 
   return (
-    <div style={{minHeight:'100vh',background:'#F0F4F9',fontFamily:'DM Sans, sans-serif',paddingBottom:'100px'}}>
+    <div style={{minHeight:'100vh',background:'radial-gradient(115% 78% at 50% -8%,#D6EBCE 0%,#E6F1DC 50%,#DBEBD1 100%)',fontFamily:'var(--font-manrope), Manrope, sans-serif',paddingBottom:'100px'}}>
+      <Grain/>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
         @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
         @keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
         .c1{animation:fadeUp .5s ease .05s forwards;opacity:0}
@@ -107,12 +111,12 @@ export default function CarePremium() {
               <svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M7 1L1 6.5L7 12" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>
             </Link>
             <div style={{flex:1}}>
-              <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'11px',fontWeight:400,color:'rgba(255,255,255,0.6)',letterSpacing:'0.5px',marginBottom:'3px'}}>Oxy<span style={{color:'white'}}>Gen</span> Care</div>
-              <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'22px',fontWeight:500,color:'white',lineHeight:1}}>Premium</div>
+              <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'13px',fontWeight:700,color:'rgba(255,255,255,0.7)',letterSpacing:'0.3px',marginBottom:'4px'}}>Oxy<span style={{color:'white'}}>Gen</span> Care</div>
+              <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'27px',fontWeight:800,letterSpacing:'-0.5px',color:'white',lineHeight:1.05}}>Premium</div>
             </div>
             {/* Premium badge */}
             <div style={{background:'rgba(255,255,255,0.2)',borderRadius:'20px',padding:'5px 12px',border:'1px solid rgba(255,255,255,0.3)'}}>
-              <div style={{fontFamily:'DM Mono, monospace',fontSize:'11px',fontWeight:700,color:'white',letterSpacing:'0.5px'}}>⭐ PREMIUM</div>
+              <div style={{fontFamily:'DM Mono, monospace',fontSize:'11px',fontWeight:700,color:'white',letterSpacing:'0.5px',display:'flex',alignItems:'center',gap:'4px'}}><Star size={12} color="white"/> PREMIUM</div>
             </div>
           </div>
 
@@ -121,7 +125,7 @@ export default function CarePremium() {
             <div style={{background:'rgba(255,255,255,0.15)',backdropFilter:'blur(8px)',borderRadius:'14px',padding:'12px 16px',border:'1px solid rgba(255,255,255,0.2)'}}>
               <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
                 <div>
-                  <div style={{fontSize:'12px',fontWeight:700,color:'white',marginBottom:'2px'}}>🎁 Essai gratis ou — {trialDaysLeft} jou ki rete</div>
+                  <div style={{fontSize:'12px',fontWeight:700,color:'white',marginBottom:'2px',display:'flex',alignItems:'center',gap:'5px'}}><Gift size={14} color="white"/> Essai gratis ou — {trialDaysLeft} jou ki rete</div>
                   <div style={{fontSize:'11px',color:'rgba(255,255,255,0.7)'}}>Tout fonksyonalite Premium aktive</div>
                 </div>
                 {/* Progress bar */}
@@ -153,7 +157,7 @@ export default function CarePremium() {
               {plan==='haiti'&&<div style={{position:'absolute',top:0,right:0,background:TEAL,color:'white',fontSize:'9px',fontWeight:700,padding:'4px 10px',borderRadius:'0 16px 0 10px',letterSpacing:'0.5px'}}>CHWAZI</div>}
               <div style={{marginBottom:'10px'}}>
                 <div style={{fontSize:'11px',fontWeight:700,color:'#6B7A90',marginBottom:'4px'}}>🇭🇹 Ayiti</div>
-                <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'28px',fontWeight:500,color:plan==='haiti'?TEAL:NAVY,lineHeight:1}}>2 000</div>
+                <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'28px',fontWeight:700,color:plan==='haiti'?TEAL:NAVY,lineHeight:1}}>2 000</div>
                 <div style={{fontSize:'11px',color:'#6B7A90',fontWeight:500,marginTop:'2px'}}>HTG / 6 mwa</div>
               </div>
               <div style={{fontSize:'11px',color:'#6B7A90',lineHeight:1.5}}>MonCash · Natcash</div>
@@ -164,8 +168,8 @@ export default function CarePremium() {
               style={{background:'white',borderRadius:'18px',border:`2px solid ${plan==='diaspora'?GOLD:'rgba(27,42,74,0.1)'}`,padding:'16px',cursor:'pointer',boxShadow:plan==='diaspora'?'0 0 0 3px rgba(212,168,67,0.15)':'none',transition:'all .2s',position:'relative',overflow:'hidden'}}>
               {plan==='diaspora'&&<div style={{position:'absolute',top:0,right:0,background:GOLD,color:'white',fontSize:'9px',fontWeight:700,padding:'4px 10px',borderRadius:'0 16px 0 10px',letterSpacing:'0.5px'}}>CHWAZI</div>}
               <div style={{marginBottom:'10px'}}>
-                <div style={{fontSize:'11px',fontWeight:700,color:'#6B7A90',marginBottom:'4px'}}>🌍 Diaspora — Kado</div>
-                <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'28px',fontWeight:500,color:plan==='diaspora'?GOLD:NAVY,lineHeight:1}}>25</div>
+                <div style={{fontSize:'11px',fontWeight:700,color:'#6B7A90',marginBottom:'4px',display:'flex',alignItems:'center',gap:'4px'}}><Globe size={12} color="#6B7A90"/> Diaspora — Kado</div>
+                <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'28px',fontWeight:700,color:plan==='diaspora'?GOLD:NAVY,lineHeight:1}}>25</div>
                 <div style={{fontSize:'11px',color:'#6B7A90',fontWeight:500,marginTop:'2px'}}>USD / an</div>
               </div>
               <div style={{fontSize:'11px',color:'#6B7A90',lineHeight:1.5}}>Ofri pou yon pwòch an Ayiti</div>
@@ -174,8 +178,9 @@ export default function CarePremium() {
 
           {/* Diaspora note */}
           {plan==='diaspora'&&(
-            <div style={{background:'rgba(212,168,67,0.08)',border:'1px solid rgba(212,168,67,0.2)',borderRadius:'12px',padding:'10px 14px',marginTop:'10px',fontSize:'12px',color:'#8C6B00',lineHeight:1.6}}>
-              🎁 Ou peye yon fwa — yon manm fanmi ou an Ayiti jwenn 1 an Premium gratis. Rapò otomatik chak dimanch pa WhatsApp.
+            <div style={{background:'rgba(212,168,67,0.08)',border:'1px solid rgba(212,168,67,0.2)',borderRadius:'12px',padding:'10px 14px',marginTop:'10px',fontSize:'12px',color:'#8C6B00',lineHeight:1.6,display:'flex',alignItems:'flex-start',gap:'6px'}}>
+              <Gift size={14} color="#8C6B00" style={{flexShrink:0,marginTop:'2px'}}/>
+              <span>Ou peye yon fwa — yon manm fanmi ou an Ayiti jwenn 1 an Premium gratis. Rapò otomatik chak dimanch pa WhatsApp.</span>
             </div>
           )}
         </div>
@@ -186,7 +191,7 @@ export default function CarePremium() {
           <div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
             {FEATURES.map((f,i)=>(
               <div key={i} style={{display:'flex',alignItems:'center',gap:'12px'}}>
-                <div style={{width:'32px',height:'32px',borderRadius:'10px',background:'rgba(10,122,106,0.08)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'16px',flexShrink:0}}>{f.icon}</div>
+                <div style={{width:'32px',height:'32px',borderRadius:'10px',background:'rgba(10,122,106,0.08)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><f.Icon size={16} color={TEAL}/></div>
                 <div style={{fontSize:'13px',fontWeight:500,color:NAVY,flex:1}}>{f.label}</div>
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="rgba(26,138,74,0.1)"/><path d="M5 8L7 10L11 6" stroke="#1A8A4A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
               </div>
@@ -199,7 +204,7 @@ export default function CarePremium() {
           <div style={{fontSize:'10px',fontWeight:700,letterSpacing:'1.5px',color:'#6B7A90',textTransform:'uppercase',marginBottom:'8px',paddingLeft:'2px'}}>Metòd peman</div>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px'}}>
             {paymentMethods.map(m=>(
-              <button key={m.key} className="pay-btn" onClick={()=>setPayment(m.key)} style={{background:'white',border:`2px solid ${payment===m.key?(plan==='diaspora'?GOLD:TEAL):'rgba(27,42,74,0.1)'}`,borderRadius:'14px',padding:'12px',cursor:'pointer',textAlign:'left',fontFamily:'DM Sans, sans-serif',boxShadow:payment===m.key?`0 0 0 3px ${plan==='diaspora'?'rgba(212,168,67,0.12)':'rgba(10,122,106,0.1)'}`:'none',transition:'all .15s',display:'flex',alignItems:'center',gap:'8px'}}>
+              <button key={m.key} className="pay-btn" onClick={()=>setPayment(m.key)} style={{background:'white',border:`2px solid ${payment===m.key?(plan==='diaspora'?GOLD:TEAL):'rgba(27,42,74,0.1)'}`,borderRadius:'14px',padding:'12px',cursor:'pointer',textAlign:'left',fontFamily:'var(--font-manrope), Manrope, sans-serif',boxShadow:payment===m.key?`0 0 0 3px ${plan==='diaspora'?'rgba(212,168,67,0.12)':'rgba(10,122,106,0.1)'}`:'none',transition:'all .15s',display:'flex',alignItems:'center',gap:'8px'}}>
                 {m.flag&&<span style={{fontSize:'18px'}}>{m.flag}</span>}
                 <div>
                   <div style={{fontSize:'13px',fontWeight:700,color:payment===m.key?(plan==='diaspora'?GOLD:TEAL):NAVY}}>{m.name}</div>
@@ -216,7 +221,7 @@ export default function CarePremium() {
           <div style={{display:'flex',flexDirection:'column',gap:'5px'}}>
             {['J-14 · J-7 · J-1 : nou raple ou pa WhatsApp','Ou ka renouvle nenpòt lè','Done ou yo pa janm efase — menm si ou pa peye'].map((t,i)=>(
               <div key={i} style={{display:'flex',alignItems:'flex-start',gap:'8px',fontSize:'12px',color:'#374151'}}>
-                <span style={{color:TEAL,fontWeight:700,flexShrink:0}}>✓</span>{t}
+                <Check size={14} color={TEAL} style={{flexShrink:0,marginTop:'2px'}}/>{t}
               </div>
             ))}
           </div>
@@ -225,16 +230,16 @@ export default function CarePremium() {
         {/* ── PAY BUTTON ── */}
         {paid ? (
           <div className="c4" style={{background:'#1A8A4A',borderRadius:'16px',padding:'18px',textAlign:'center'}}>
-            <div style={{fontSize:'24px',marginBottom:'6px'}}>✅</div>
-            <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'20px',fontWeight:500,color:'white',marginBottom:'4px'}}>Peman konfime !</div>
+            <div style={{marginBottom:'6px'}}><CircleCheck size={24} color={TEAL}/></div>
+            <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'20px',fontWeight:700,color:'white',marginBottom:'4px'}}>Peman konfime !</div>
             <div style={{fontSize:'12px',color:'rgba(255,255,255,0.7)'}}>OxyGen Care Premium aktive pou 6 mwa</div>
           </div>
         ) : (
           <div className="c4">
-            <button onClick={handlePay} disabled={paying} className={paying?'shimmer-btn':''} style={{width:'100%',background:paying?undefined:(plan==='diaspora'?GOLD:TEAL),color:'white',border:'none',borderRadius:'16px',padding:'17px',fontSize:'15px',fontWeight:700,cursor:paying?'not-allowed':'pointer',fontFamily:'DM Sans, sans-serif',boxShadow:`0 6px 20px ${plan==='diaspora'?'rgba(212,168,67,0.35)':'rgba(10,122,106,0.35)'}`,transition:'opacity .2s',marginBottom:'10px'}}>
+            <button onClick={handlePay} disabled={paying} className={paying?'shimmer-btn':''} style={{width:'100%',background:paying?undefined:(plan==='diaspora'?GOLD:TEAL),color:'white',border:'none',borderRadius:'16px',padding:'17px',fontSize:'15px',fontWeight:700,cursor:paying?'not-allowed':'pointer',fontFamily:'var(--font-manrope), Manrope, sans-serif',boxShadow:`0 6px 20px ${plan==='diaspora'?'rgba(212,168,67,0.35)':'rgba(10,122,106,0.35)'}`,transition:'opacity .2s',marginBottom:'10px'}}>
               {paying?'N ap konfime peman...':`Peye ${priceLabel} via ${payLabel}`}
             </button>
-            <Link href="/care/home" style={{display:'block',width:'100%',background:'rgba(27,42,74,0.05)',color:'#6B7A90',border:'1px solid rgba(27,42,74,0.1)',borderRadius:'14px',padding:'14px',fontSize:'13px',fontWeight:500,textDecoration:'none',textAlign:'center',fontFamily:'DM Sans, sans-serif'}}>
+            <Link href="/care/home" style={{display:'block',width:'100%',background:'rgba(27,42,74,0.05)',color:'#6B7A90',border:'1px solid rgba(27,42,74,0.1)',borderRadius:'14px',padding:'14px',fontSize:'13px',fontWeight:500,textDecoration:'none',textAlign:'center',fontFamily:'var(--font-manrope), Manrope, sans-serif'}}>
               Kontinye gratis — {trialDaysLeft} jou ki rete
             </Link>
           </div>

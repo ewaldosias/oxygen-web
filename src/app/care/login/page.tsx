@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
+import { Stethoscope, HeartPulse, Baby, Eye, Droplet, Activity } from 'lucide-react'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -36,15 +37,15 @@ const COUNTRIES = [
 ]
 
 const SPECIALTIES = [
-  { key:'medecine_interne',   icon:'🫀', label:'Medsin Entèn',      sub:'Médecine Interne'  },
-  { key:'obstetrique_gyneco', icon:'🤰', label:'Obstetrik / Jeneko', sub:'OB/GYN'            },
-  { key:'ophtalmologie',      icon:'👁️', label:'Oftalmo',            sub:'Ophtalmologie'     },
-  { key:'generaliste',        icon:'🩺', label:'Jeneral / Lòt',      sub:'Généraliste'       },
+  { key:'medecine_interne',   Icon: HeartPulse,  label:'Medsin Entèn',       sub:'Médecine Interne' },
+  { key:'obstetrique_gyneco', Icon: Baby,        label:'Obstetrik / Jeneko', sub:'OB/GYN'           },
+  { key:'ophtalmologie',      Icon: Eye,         label:'Oftalmo',            sub:'Ophtalmologie'    },
+  { key:'generaliste',        Icon: Stethoscope, label:'Jeneral / Lòt',      sub:'Généraliste'      },
 ]
 
 const CONDITIONS = [
-  { key:'hta',     icon:'❤️', label:'Tansyon wo (HTA)'  },
-  { key:'diabete', icon:'🩸', label:'Sik (Dyabèt)'      },
+  { key:'hta',     Icon: Activity, label:'Tansyon wo (HTA)' },
+  { key:'diabete', Icon: Droplet,  label:'Sik (Dyabèt)'     },
 ]
 
 /* ── CANVAS ── */
@@ -65,7 +66,7 @@ function useMolCanvas(ref: React.RefObject<HTMLCanvasElement | null>) {
         const d = Math.hypot(nodes[i].x-nodes[j].x, nodes[i].y-nodes[j].y)
         if (d < MAX) { ctx!.strokeStyle = `rgba(212,168,67,${(1-d/MAX)*.2})`; ctx!.lineWidth = 0.8; ctx!.beginPath(); ctx!.moveTo(nodes[i].x, nodes[i].y); ctx!.lineTo(nodes[j].x, nodes[j].y); ctx!.stroke() }
       }
-      nodes.forEach(n => { ctx!.fillStyle = 'rgba(255,255,255,0.15)'; ctx!.beginPath(); ctx!.arc(n.x, n.y, n.r, 0, Math.PI*2); ctx!.fill(); n.x += n.vx; n.y += n.vy; if (n.x<0||n.x>W) n.vx *= -1; if (n.y<0||n.y>H) n.vy *= -1 })
+      nodes.forEach(n => { ctx!.fillStyle = 'rgba(18,58,43,0.15)'; ctx!.beginPath(); ctx!.arc(n.x, n.y, n.r, 0, Math.PI*2); ctx!.fill(); n.x += n.vx; n.y += n.vy; if (n.x<0||n.x>W) n.vx *= -1; if (n.y<0||n.y>H) n.vy *= -1 })
       raf = requestAnimationFrame(tick)
     }
     resize(); init()
@@ -225,16 +226,16 @@ export default function LoginPage() {
   /* ── STYLES ── */
   const S = {
     input: {
-      width:'100%', background:'rgba(255,255,255,.1)',
-      border:'1.5px solid rgba(255,255,255,.2)', borderRadius:'14px',
-      padding:'16px 18px', fontSize:'18px', color:'white', outline:'none',
-      fontFamily:'DM Sans, sans-serif',
+      width:'100%', background:'rgba(18,58,43,.1)',
+      border:'1.5px solid rgba(18,58,43,.2)', borderRadius:'14px',
+      padding:'16px 18px', fontSize:'18px', color:'#123A2B', outline:'none',
+      fontFamily:'var(--font-manrope), Manrope, sans-serif',
     } as React.CSSProperties,
     btn: {
-      width:'100%', background:'white', color:TEAL, border:'none',
+      width:'100%', background:'#0E8A67', color:'white', border:'none',
       borderRadius:'14px', padding:'17px', fontSize:'15px', fontWeight:700,
-      cursor:'pointer', fontFamily:'DM Sans, sans-serif',
-      boxShadow:'0 6px 24px rgba(0,0,0,0.2)',
+      cursor:'pointer', fontFamily:'var(--font-manrope), Manrope, sans-serif',
+      boxShadow:'0 8px 24px rgba(14,138,103,0.28)',
     } as React.CSSProperties,
     chip: { transition:'all .15s', cursor:'pointer' } as React.CSSProperties,
   }
@@ -244,10 +245,10 @@ export default function LoginPage() {
   const progress  = step === 'role' ? 8 : ((stepIdx) / stepTotal) * 100
 
   return (
-    <div style={{minHeight:'100vh',background:`linear-gradient(150deg,#065C50 0%,${TEAL} 100%)`,fontFamily:'DM Sans, sans-serif',color:'white',padding:'0 24px 48px',display:'flex',flexDirection:'column',position:'relative',overflow:'hidden'}}>
+    <div style={{minHeight:'100vh',background:'radial-gradient(58% 46% at 28% 38%, #A6E85F 0%, rgba(166,232,95,0) 62%), radial-gradient(52% 44% at 76% 68%, #CBE79E 0%, rgba(203,231,158,0) 58%), radial-gradient(135% 120% at 50% 15%, #C2E2A6 0%, #E9EEDB 100%)',fontFamily:'var(--font-manrope), Manrope, sans-serif',color:'#123A2B',padding:'0 24px 48px',display:'flex',flexDirection:'column',position:'relative',overflow:'hidden'}}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
-        input::placeholder{color:rgba(255,255,255,.35)}
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+        input::placeholder{color:rgba(18,58,43,.35)}
         input:focus{border-color:${GOLD}!important;box-shadow:0 0 0 3px rgba(212,168,67,.15)!important}
         @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.07);filter:drop-shadow(0 0 12px rgba(212,168,67,.5))}}
         @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
@@ -256,14 +257,17 @@ export default function LoginPage() {
         .fu{animation:fadeUp .4s ease forwards}
         .su{animation:slideUp .35s cubic-bezier(.34,1.2,.64,1) forwards}
         .chip-press:active{transform:scale(.97)}
-        .country-row:hover{background:rgba(255,255,255,.08)!important}
+        .country-row:hover{background:rgba(18,58,43,.08)!important}
         @media(prefers-reduced-motion:reduce){.bb,.fu,.su{animation:none}}
       `}</style>
 
-      <canvas ref={canvasRef} style={{position:'fixed',inset:0,width:'100%',height:'100%',pointerEvents:'none',opacity:.5,zIndex:0}}/>
+      <canvas ref={canvasRef} style={{position:'fixed',inset:0,width:'100%',height:'100%',pointerEvents:'none',opacity:.4,zIndex:0}}/>
+
+      {/* Film grain */}
+      <div style={{position:'fixed',inset:0,zIndex:1,pointerEvents:'none',opacity:.30,mixBlendMode:'soft-light',backgroundImage:"url(\"data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='180'%20height='180'%3E%3Cfilter%20id='n'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.9'%20numOctaves='3'%20stitchTiles='stitch'/%3E%3C/filter%3E%3Crect%20width='180'%20height='180'%20filter='url(%23n)'/%3E%3C/svg%3E\")"}}/>
 
       {/* Progress */}
-      <div style={{position:'fixed',top:0,left:0,right:0,height:'3px',background:'rgba(255,255,255,.1)',zIndex:100}}>
+      <div style={{position:'fixed',top:0,left:0,right:0,height:'3px',background:'rgba(18,58,43,.1)',zIndex:100}}>
         <div style={{height:'100%',width:`${progress}%`,background:`linear-gradient(90deg,rgba(212,168,67,.5),${GOLD})`,borderRadius:'0 2px 2px 0',transition:'width .5s ease'}}/>
       </div>
 
@@ -273,12 +277,12 @@ export default function LoginPage() {
           <button onClick={()=>{
             const back: Record<Step,Step> = {role:'role',phone:'role',otp:'phone',name:'otp',specialty:'name',conditions:'name'}
             setStep(back[step]); setErrMsg('')
-          }} style={{background:'none',border:'none',color:'rgba(255,255,255,.6)',cursor:'pointer',fontSize:'13px',fontWeight:500,fontFamily:'DM Sans, sans-serif',display:'flex',alignItems:'center',gap:'6px',padding:0}}>
+          }} style={{background:'none',border:'none',color:'rgba(18,58,43,.6)',cursor:'pointer',fontSize:'13px',fontWeight:500,fontFamily:'var(--font-manrope), Manrope, sans-serif',display:'flex',alignItems:'center',gap:'6px',padding:0}}>
             <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M6 1L1 6L6 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
             Tounen
           </button>
         ) : <div/>}
-        <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'13px',color:'rgba(255,255,255,.5)',letterSpacing:'.5px'}}>
+        <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'13px',fontWeight:800,color:'rgba(18,58,43,.55)',letterSpacing:'.3px'}}>
           Oxy<span style={{color:GOLD}}>Gen</span> Care
         </div>
       </div>
@@ -286,17 +290,25 @@ export default function LoginPage() {
       {/* Logo */}
       <div style={{position:'relative',zIndex:2,textAlign:'center',marginBottom:'28px'}}>
         <div className="bb" style={{display:'inline-block'}}>
-          <svg width="48" height="48" viewBox="0 0 160 160" fill="none">
-            <g transform="rotate(-20,80,80)"><ellipse cx="80" cy="80" rx="68" ry="48" fill="none" stroke={GOLD} strokeWidth="2"/><circle cx="148" cy="80" r="7" fill="white"/><circle cx="46" cy="121" r="7" fill="white"/><circle cx="114" cy="39" r="7" fill="white"/></g>
-            <circle cx="80" cy="80" r="36" fill="none" stroke={GOLD} strokeWidth="2"/>
-            <circle cx="80" cy="44" r="7" fill="white"/><circle cx="80" cy="80" r="18" fill="white"/>
+          <svg width="54" height="54" viewBox="0 0 160 160" fill="none">
+            <defs>
+              <radialGradient id="careNuc" cx="35%" cy="30%" r="75%">
+                <stop offset="0%" stopColor="#FCEFC6"/><stop offset="45%" stopColor="#E6BC58"/><stop offset="100%" stopColor="#B6852A"/>
+              </radialGradient>
+            </defs>
+            <circle cx="80" cy="80" r="64" fill="none" stroke="#123A2B" strokeWidth="4"/>
+            <circle cx="80" cy="80" r="33" fill="none" stroke="#123A2B" strokeWidth="3.5"/>
+            <circle cx="144" cy="80" r="7" fill="#123A2B"/><circle cx="112" cy="24.6" r="7" fill="#123A2B"/><circle cx="48" cy="24.6" r="7" fill="#123A2B"/><circle cx="16" cy="80" r="7" fill="#123A2B"/><circle cx="48" cy="135.4" r="7" fill="#123A2B"/><circle cx="112" cy="135.4" r="7" fill="#123A2B"/>
+            <circle cx="80" cy="47" r="6.5" fill="#123A2B"/><circle cx="80" cy="113" r="6.5" fill="#123A2B"/>
+            <circle cx="80" cy="80" r="17" fill="url(#careNuc)"/>
+            <ellipse cx="74.6" cy="73.5" rx="7.1" ry="5.1" fill="#fff" opacity="0.5"/>
           </svg>
         </div>
       </div>
 
       {/* Error */}
       {errMsg && (
-        <div style={{position:'relative',zIndex:2,background:'rgba(192,57,43,.2)',border:'1px solid rgba(192,57,43,.4)',borderRadius:'12px',padding:'10px 14px',marginBottom:'16px',fontSize:'13px',color:'#ffaaaa',textAlign:'center'}}>
+        <div style={{position:'relative',zIndex:2,background:'rgba(192,57,43,.1)',border:'1px solid rgba(192,57,43,.3)',borderRadius:'12px',padding:'10px 14px',marginBottom:'16px',fontSize:'13px',fontWeight:600,color:'#8E2A20',textAlign:'center'}}>
           {errMsg}
         </div>
       )}
@@ -307,28 +319,28 @@ export default function LoginPage() {
         {/* ROLE */}
         {step === 'role' && (
           <div className="fu">
-            <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'36px',fontWeight:400,lineHeight:1.2,marginBottom:'8px'}}>
-              Byenveni nan<br/><span style={{color:GOLD,fontStyle:'italic'}}>OxyGen Care</span>
+            <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'36px',fontWeight:800,letterSpacing:'-1px',lineHeight:1.2,marginBottom:'8px'}}>
+              Byenveni nan<br/><span style={{color:GOLD}}>OxyGen Care</span>
             </div>
-            <p style={{fontSize:'14px',color:'rgba(255,255,255,.5)',marginBottom:'36px',fontWeight:300}}>Ki sa ou ye ?</p>
+            <p style={{fontSize:'14px',color:'rgba(18,58,43,.5)',marginBottom:'36px',fontWeight:300}}>Ki sa ou ye ?</p>
             <div style={{display:'flex',flexDirection:'column',gap:'12px',marginBottom:'28px'}}>
               {[
-                { r:'doctor'  as Role, icon:'👨‍⚕️', label:'Medsen', sub:'Pwofesyonèl sante · Swiv pasyan ou yo' },
-                { r:'patient' as Role, icon:'🏥',   label:'Pasyan', sub:'Swiv sante ou chak jou'               },
+                { r:'doctor'  as Role, Icon: Stethoscope, label:'Medsen', sub:'Pwofesyonèl sante · Swiv pasyan ou yo' },
+                { r:'patient' as Role, Icon: HeartPulse,  label:'Pasyan', sub:'Swiv sante ou chak jou'               },
               ].map(o=>(
-                <div key={o.r} className="chip-press" onClick={()=>{setRole(o.r);setStep('phone');setErrMsg('')}} style={{background:'rgba(255,255,255,.08)',border:'1.5px solid rgba(255,255,255,.18)',borderRadius:'20px',padding:'22px 20px',display:'flex',alignItems:'center',gap:'16px',cursor:'pointer'}}>
-                  <div style={{width:'52px',height:'52px',borderRadius:'14px',background:o.r==='doctor'?'rgba(212,168,67,.15)':'rgba(10,122,106,.2)',border:`1.5px solid ${o.r==='doctor'?'rgba(212,168,67,.3)':'rgba(10,122,106,.4)'}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'26px',flexShrink:0}}>{o.icon}</div>
+                <div key={o.r} className="chip-press" onClick={()=>{setRole(o.r);setStep('phone');setErrMsg('')}} style={{background:'rgba(18,58,43,.08)',border:'1.5px solid rgba(18,58,43,.18)',borderRadius:'20px',padding:'22px 20px',display:'flex',alignItems:'center',gap:'16px',cursor:'pointer'}}>
+                  <div style={{width:'52px',height:'52px',borderRadius:'14px',background:o.r==='doctor'?'rgba(212,168,67,.15)':'rgba(10,122,106,.2)',border:`1.5px solid ${o.r==='doctor'?'rgba(212,168,67,.3)':'rgba(10,122,106,.4)'}`,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><o.Icon size={26} color={o.r==='doctor'?GOLD:'#123A2B'} strokeWidth={1.9}/></div>
                   <div style={{flex:1}}>
-                    <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'22px',fontWeight:500,marginBottom:'3px'}}>{o.label}</div>
-                    <div style={{fontSize:'12px',color:'rgba(255,255,255,.45)'}}>{o.sub}</div>
+                    <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'22px',fontWeight:700,marginBottom:'3px'}}>{o.label}</div>
+                    <div style={{fontSize:'12px',color:'rgba(18,58,43,.45)'}}>{o.sub}</div>
                   </div>
-                  <svg width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M1 1L7 7L1 13" stroke="rgba(255,255,255,.35)" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                  <svg width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M1 1L7 7L1 13" stroke="rgba(18,58,43,.35)" strokeWidth="1.5" strokeLinecap="round"/></svg>
                 </div>
               ))}
             </div>
             <div style={{textAlign:'center'}}>
-              <span style={{fontSize:'13px',color:'rgba(255,255,255,.4)'}}>Ou deja gen yon kont? </span>
-              <button onClick={()=>{setStep('phone');setErrMsg('')}} style={{background:'none',border:'none',color:GOLD,fontSize:'13px',fontWeight:700,cursor:'pointer',fontFamily:'DM Sans, sans-serif',textDecoration:'underline',textUnderlineOffset:'3px'}}>
+              <span style={{fontSize:'13px',color:'rgba(18,58,43,.4)'}}>Ou deja gen yon kont? </span>
+              <button onClick={()=>{setStep('phone');setErrMsg('')}} style={{background:'none',border:'none',color:GOLD,fontSize:'13px',fontWeight:700,cursor:'pointer',fontFamily:'var(--font-manrope), Manrope, sans-serif',textDecoration:'underline',textUnderlineOffset:'3px'}}>
                 Konekte
               </button>
             </div>
@@ -338,17 +350,18 @@ export default function LoginPage() {
         {/* PHONE */}
         {step === 'phone' && (
           <div className="fu">
-            <div style={{fontSize:'11px',fontWeight:700,letterSpacing:'2px',color:'rgba(212,168,67,.8)',textTransform:'uppercase',marginBottom:'10px'}}>
-              {role === 'doctor' ? '👨‍⚕️ Medsen' : '🏥 Pasyan'}
+            <div style={{fontSize:'11px',fontWeight:700,letterSpacing:'2px',color:'rgba(212,168,67,.8)',textTransform:'uppercase',marginBottom:'10px',display:'flex',alignItems:'center',gap:'6px'}}>
+              {role === 'doctor' ? <Stethoscope size={14}/> : <HeartPulse size={14}/>}
+              {role === 'doctor' ? 'Medsen' : 'Pasyan'}
             </div>
-            <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'34px',fontWeight:400,lineHeight:1.2,marginBottom:'8px'}}>Nimewo telefòn ou</div>
-            <p style={{fontSize:'14px',color:'rgba(255,255,255,.5)',marginBottom:'32px',fontWeight:300}}>Nou ap voye yon kòd 6 chif ba ou</p>
-            <label style={{fontSize:'11px',fontWeight:700,letterSpacing:'1.2px',color:'rgba(255,255,255,.45)',textTransform:'uppercase',marginBottom:'10px',display:'block'}}>Nimewo</label>
+            <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'34px',fontWeight:800,letterSpacing:'-1px',lineHeight:1.2,marginBottom:'8px'}}>Nimewo telefòn ou</div>
+            <p style={{fontSize:'14px',color:'rgba(18,58,43,.5)',marginBottom:'32px',fontWeight:300}}>Nou ap voye yon kòd 6 chif ba ou</p>
+            <label style={{fontSize:'11px',fontWeight:700,letterSpacing:'1.2px',color:'rgba(18,58,43,.45)',textTransform:'uppercase',marginBottom:'10px',display:'block'}}>Nimewo</label>
             <div style={{display:'flex',gap:'8px',marginBottom:'24px'}}>
-              <button className="chip-press" onClick={()=>setShowCountry(true)} style={{background:'rgba(255,255,255,.1)',border:'1.5px solid rgba(255,255,255,.2)',borderRadius:'12px',padding:'14px 12px',display:'flex',alignItems:'center',gap:'6px',cursor:'pointer',flexShrink:0}}>
+              <button className="chip-press" onClick={()=>setShowCountry(true)} style={{background:'rgba(18,58,43,.1)',border:'1.5px solid rgba(18,58,43,.2)',borderRadius:'12px',padding:'14px 12px',display:'flex',alignItems:'center',gap:'6px',cursor:'pointer',flexShrink:0}}>
                 <span style={{fontSize:'20px'}}>{country.flag}</span>
                 <span style={{fontFamily:'DM Mono, monospace',fontSize:'15px',fontWeight:600}}>{country.dial}</span>
-                <svg width="9" height="6" viewBox="0 0 9 6" fill="none"><path d="M1 1L4.5 5L8 1" stroke="rgba(255,255,255,.5)" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                <svg width="9" height="6" viewBox="0 0 9 6" fill="none"><path d="M1 1L4.5 5L8 1" stroke="rgba(18,58,43,.5)" strokeWidth="1.5" strokeLinecap="round"/></svg>
               </button>
               <input style={{...S.input,flex:1,fontSize:'20px',letterSpacing:'2px'}} type="tel" placeholder="XXXX XXXX" value={phone} onChange={e=>setPhone(e.target.value)} onKeyDown={e=>e.key==='Enter'&&handleSendOtp()}/>
             </div>
@@ -361,8 +374,8 @@ export default function LoginPage() {
         {/* OTP */}
         {step === 'otp' && (
           <div className="fu">
-            <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'34px',fontWeight:400,lineHeight:1.2,marginBottom:'6px'}}>Kòd ou resevwa a</div>
-            <p style={{fontSize:'14px',color:'rgba(255,255,255,.5)',marginBottom:'4px',fontWeight:300}}>Kòd 6 chif nou voye ba ou</p>
+            <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'34px',fontWeight:800,letterSpacing:'-1px',lineHeight:1.2,marginBottom:'6px'}}>Kòd ou resevwa a</div>
+            <p style={{fontSize:'14px',color:'rgba(18,58,43,.5)',marginBottom:'4px',fontWeight:300}}>Kòd 6 chif nou voye ba ou</p>
             <p style={{fontSize:'15px',color:GOLD,fontWeight:700,marginBottom:'32px'}}>{country.flag} {fullPhone}</p>
 
             <div style={{display:'flex',gap:'8px',justifyContent:'center',marginBottom:'28px'}}>
@@ -375,10 +388,10 @@ export default function LoginPage() {
                   onKeyDown={e => handleOtpKey(e, idx)}
                   style={{
                     width:'46px', height:'60px',
-                    background: digit ? 'rgba(212,168,67,.2)' : 'rgba(255,255,255,.1)',
-                    border: `2px solid ${digit ? GOLD : 'rgba(255,255,255,.2)'}`,
+                    background: digit ? 'rgba(212,168,67,.2)' : 'rgba(18,58,43,.1)',
+                    border: `2px solid ${digit ? GOLD : 'rgba(18,58,43,.2)'}`,
                     borderRadius:'14px', fontSize:'26px', fontWeight:700,
-                    color:'white', textAlign:'center', outline:'none',
+                    color:'#123A2B', textAlign:'center', outline:'none',
                     fontFamily:'DM Mono, monospace', transition:'all .15s',
                   }}
                 />
@@ -396,7 +409,7 @@ export default function LoginPage() {
             <button
               onClick={handleSendOtp}
               disabled={resendTimer > 0}
-              style={{background:'none',border:'none',color:resendTimer>0?'rgba(255,255,255,.3)':'rgba(255,255,255,.65)',fontSize:'13px',fontWeight:500,cursor:resendTimer>0?'default':'pointer',fontFamily:'DM Sans, sans-serif',textDecoration:resendTimer===0?'underline':'none',textUnderlineOffset:'3px',width:'100%',textAlign:'center'}}
+              style={{background:'none',border:'none',color:resendTimer>0?'rgba(18,58,43,.3)':'rgba(18,58,43,.65)',fontSize:'13px',fontWeight:500,cursor:resendTimer>0?'default':'pointer',fontFamily:'var(--font-manrope), Manrope, sans-serif',textDecoration:resendTimer===0?'underline':'none',textUnderlineOffset:'3px',width:'100%',textAlign:'center'}}
             >
               {resendTimer > 0 ? `Voye kòd ankò (${resendTimer}s)` : 'Voye kòd ankò'}
             </button>
@@ -406,10 +419,10 @@ export default function LoginPage() {
         {/* NAME */}
         {step === 'name' && (
           <div className="fu">
-            <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'34px',fontWeight:400,lineHeight:1.2,marginBottom:'8px'}}>
+            <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'34px',fontWeight:800,letterSpacing:'-1px',lineHeight:1.2,marginBottom:'8px'}}>
               {role === 'doctor' ? 'Ki non ou ?' : 'Ki jan yo rele ou ?'}
             </div>
-            <p style={{fontSize:'14px',color:'rgba(255,255,255,.5)',marginBottom:'32px',fontWeight:300}}>
+            <p style={{fontSize:'14px',color:'rgba(18,58,43,.5)',marginBottom:'32px',fontWeight:300}}>
               {role === 'doctor' ? 'Non konplè ou (Dr. ...)' : 'Sèlman prenon — pa bezwen non fanmi'}
             </p>
             <input
@@ -433,15 +446,15 @@ export default function LoginPage() {
         {/* SPECIALTY (doctor) */}
         {step === 'specialty' && (
           <div className="fu">
-            <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'34px',fontWeight:400,lineHeight:1.2,marginBottom:'8px'}}>Kisa ou espesyalize ?</div>
-            <p style={{fontSize:'14px',color:'rgba(255,255,255,.5)',marginBottom:'28px',fontWeight:300}}>Chwazi espesyalite ou prensipal</p>
+            <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'34px',fontWeight:800,letterSpacing:'-1px',lineHeight:1.2,marginBottom:'8px'}}>Kisa ou espesyalize ?</div>
+            <p style={{fontSize:'14px',color:'rgba(18,58,43,.5)',marginBottom:'28px',fontWeight:300}}>Chwazi espesyalite ou prensipal</p>
             <div style={{display:'flex',flexDirection:'column',gap:'10px',marginBottom:'28px'}}>
               {SPECIALTIES.map(s=>(
-                <div key={s.key} className="chip-press" onClick={()=>setSpecialty(s.key)} style={{background:specialty===s.key?'rgba(212,168,67,.15)':'rgba(255,255,255,.08)',border:`1.5px solid ${specialty===s.key?GOLD:'rgba(255,255,255,.15)'}`,borderRadius:'16px',padding:'18px 20px',display:'flex',alignItems:'center',gap:'14px',cursor:'pointer',transition:'all .2s'}}>
-                  <span style={{fontSize:'24px'}}>{s.icon}</span>
+                <div key={s.key} className="chip-press" onClick={()=>setSpecialty(s.key)} style={{background:specialty===s.key?'rgba(212,168,67,.15)':'rgba(18,58,43,.08)',border:`1.5px solid ${specialty===s.key?GOLD:'rgba(18,58,43,.15)'}`,borderRadius:'16px',padding:'18px 20px',display:'flex',alignItems:'center',gap:'14px',cursor:'pointer',transition:'all .2s'}}>
+                  <s.Icon size={22} color={specialty===s.key?GOLD:'#123A2B'} strokeWidth={1.9} style={{flexShrink:0}}/>
                   <div style={{flex:1}}>
-                    <div style={{fontSize:'15px',fontWeight:700,color:'white'}}>{s.label}</div>
-                    <div style={{fontSize:'11px',color:specialty===s.key?GOLD:'rgba(255,255,255,.4)',marginTop:'2px'}}>{s.sub}</div>
+                    <div style={{fontSize:'15px',fontWeight:700,color:'#123A2B'}}>{s.label}</div>
+                    <div style={{fontSize:'11px',color:specialty===s.key?GOLD:'rgba(18,58,43,.4)',marginTop:'2px'}}>{s.sub}</div>
                   </div>
                   {specialty===s.key && (
                     <div style={{width:'20px',height:'20px',borderRadius:'50%',background:GOLD,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
@@ -460,17 +473,17 @@ export default function LoginPage() {
         {/* CONDITIONS (patient) */}
         {step === 'conditions' && (
           <div className="fu">
-            <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'34px',fontWeight:400,lineHeight:1.2,marginBottom:'8px'}}>Sa m ap swiv</div>
-            <p style={{fontSize:'14px',color:'rgba(255,255,255,.5)',marginBottom:'28px',fontWeight:300}}>Chwazi tout kondisyon ki aplike ba ou</p>
+            <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'34px',fontWeight:800,letterSpacing:'-1px',lineHeight:1.2,marginBottom:'8px'}}>Sa m ap swiv</div>
+            <p style={{fontSize:'14px',color:'rgba(18,58,43,.5)',marginBottom:'28px',fontWeight:300}}>Chwazi tout kondisyon ki aplike ba ou</p>
             <div style={{display:'flex',flexDirection:'column',gap:'12px',marginBottom:'28px'}}>
               {CONDITIONS.map(c=>(
-                <div key={c.key} className="chip-press" onClick={()=>setConditions(prev=>prev.includes(c.key)?prev.filter(x=>x!==c.key):[...prev,c.key])} style={{background:conditions.includes(c.key)?'rgba(212,168,67,.15)':'rgba(255,255,255,.08)',border:`1.5px solid ${conditions.includes(c.key)?GOLD:'rgba(255,255,255,.15)'}`,borderRadius:'18px',padding:'22px 20px',display:'flex',alignItems:'center',gap:'16px',cursor:'pointer',transition:'all .2s'}}>
-                  <span style={{fontSize:'30px'}}>{c.icon}</span>
+                <div key={c.key} className="chip-press" onClick={()=>setConditions(prev=>prev.includes(c.key)?prev.filter(x=>x!==c.key):[...prev,c.key])} style={{background:conditions.includes(c.key)?'rgba(212,168,67,.15)':'rgba(18,58,43,.08)',border:`1.5px solid ${conditions.includes(c.key)?GOLD:'rgba(18,58,43,.15)'}`,borderRadius:'18px',padding:'22px 20px',display:'flex',alignItems:'center',gap:'16px',cursor:'pointer',transition:'all .2s'}}>
+                  <c.Icon size={26} color={conditions.includes(c.key)?GOLD:'#123A2B'} strokeWidth={1.9} style={{flexShrink:0}}/>
                   <div style={{flex:1}}>
-                    <div style={{fontSize:'16px',fontWeight:600,color:'white'}}>{c.label}</div>
+                    <div style={{fontSize:'16px',fontWeight:600,color:'#123A2B'}}>{c.label}</div>
                     {conditions.includes(c.key) && <div style={{fontSize:'11px',color:GOLD,fontWeight:700,marginTop:'3px'}}>✓ Seleksyone</div>}
                   </div>
-                  <div style={{width:'22px',height:'22px',borderRadius:'50%',background:conditions.includes(c.key)?GOLD:'transparent',border:`2px solid ${conditions.includes(c.key)?GOLD:'rgba(255,255,255,.3)'}`,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,transition:'all .15s'}}>
+                  <div style={{width:'22px',height:'22px',borderRadius:'50%',background:conditions.includes(c.key)?GOLD:'transparent',border:`2px solid ${conditions.includes(c.key)?GOLD:'rgba(18,58,43,.3)'}`,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,transition:'all .15s'}}>
                     {conditions.includes(c.key) && <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="#065C50" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                   </div>
                 </div>
@@ -488,14 +501,14 @@ export default function LoginPage() {
       {showCountry && (
         <>
           <div onClick={()=>setShowCountry(false)} style={{position:'fixed',inset:0,background:'rgba(0,0,0,.55)',zIndex:200,backdropFilter:'blur(4px)'}}/>
-          <div className="su" style={{position:'fixed',bottom:0,left:0,right:0,zIndex:201,background:'#0C2820',borderRadius:'24px 24px 0 0',padding:'20px 20px 40px',maxHeight:'72vh',overflowY:'auto'}}>
-            <div style={{width:'36px',height:'4px',background:'rgba(255,255,255,.2)',borderRadius:'2px',margin:'0 auto 20px'}}/>
-            <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'22px',fontWeight:400,color:'white',marginBottom:'16px'}}>Chwazi peyi ou</div>
+          <div className="su" style={{position:'fixed',bottom:0,left:0,right:0,zIndex:201,background:'#FBFCF6',borderRadius:'24px 24px 0 0',padding:'20px 20px 40px',maxHeight:'72vh',overflowY:'auto',boxShadow:'0 -10px 44px rgba(18,58,43,.20)'}}>
+            <div style={{width:'36px',height:'4px',background:'rgba(18,58,43,.2)',borderRadius:'2px',margin:'0 auto 20px'}}/>
+            <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'22px',fontWeight:700,color:'#123A2B',marginBottom:'16px'}}>Chwazi peyi ou</div>
             {COUNTRIES.map(c=>(
               <div key={c.dial+c.name} className="country-row chip-press" onClick={()=>{setCountry(c);setShowCountry(false)}} style={{display:'flex',alignItems:'center',gap:'12px',padding:'12px 10px',borderRadius:'12px',cursor:'pointer',background:country.dial===c.dial&&country.name===c.name?'rgba(212,168,67,.12)':'transparent',transition:'background .15s'}}>
                 <span style={{fontSize:'22px'}}>{c.flag}</span>
-                <span style={{flex:1,fontSize:'15px',fontWeight:500,color:'white',fontFamily:'DM Sans, sans-serif'}}>{c.name}</span>
-                <span style={{fontFamily:'DM Mono, monospace',fontSize:'13px',fontWeight:600,color:country.dial===c.dial&&country.name===c.name?GOLD:'rgba(255,255,255,.4)'}}>{c.dial}</span>
+                <span style={{flex:1,fontSize:'15px',fontWeight:500,color:'#123A2B',fontFamily:'var(--font-manrope), Manrope, sans-serif'}}>{c.name}</span>
+                <span style={{fontFamily:'DM Mono, monospace',fontSize:'13px',fontWeight:600,color:country.dial===c.dial&&country.name===c.name?GOLD:'rgba(18,58,43,.4)'}}>{c.dial}</span>
               </div>
             ))}
           </div>

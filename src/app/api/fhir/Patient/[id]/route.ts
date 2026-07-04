@@ -22,13 +22,13 @@ function fhirError(status: number, code: string, text: string) {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   if (!request.headers.get('Authorization')?.startsWith('Bearer ')) {
     return fhirError(401, 'security', 'Missing Bearer token')
   }
 
-  const { id } = params
+  const { id } = await params
 
   const { data: patient, error } = await supabase
     .from('fhir_patient_view')

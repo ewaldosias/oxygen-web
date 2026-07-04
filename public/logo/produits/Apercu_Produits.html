@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OxyGen — Kit produits (aperçu)</title>
+<style>
+  :root{ --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ font-family:var(--font); background:#ECEFF3; color:#16213A; padding:40px 24px 64px; -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:1060px; margin:0 auto; }
+  h1{ font-size:27px; font-weight:680; text-align:center; letter-spacing:-0.02em; }
+  .sub{ color:#5A6678; font-size:15px; text-align:center; margin:10px auto 30px; max-width:660px; line-height:1.6; }
+  .prod{ background:#fff; border-radius:20px; padding:24px; margin-bottom:20px; box-shadow:0 8px 22px rgba(16,28,55,.09); }
+  .ph{ display:flex; align-items:center; gap:10px; margin-bottom:18px; }
+  .dot{ width:14px; height:14px; border-radius:50%; }
+  .ph .nm{ font-size:17px; font-weight:700; }
+  .ph .hx{ font-size:11.5px; color:#9AA3B2; font-weight:600; }
+  .ph .tag{ font-size:10.5px; font-weight:700; color:#8A6512; background:#FBEFCF; padding:3px 9px; border-radius:999px; margin-left:auto; }
+  .main{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px; }
+  @media(max-width:640px){ .main{ grid-template-columns:1fr; } }
+  .stage{ border-radius:14px; display:flex; align-items:center; justify-content:center; padding:26px 18px; min-height:150px; }
+  .stage.l{ background:#F7F8FB; } .stage.d{ background:#0E1730; }
+  .stage img{ max-width:90%; max-height:128px; height:auto; }
+  .cap{ font-size:11px; color:#9AA3B2; font-weight:600; margin:6px 0 10px; }
+  .strip{ display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+  .strip figure{ text-align:center; }
+  .strip img{ border-radius:14px; display:block; }
+  .strip figcaption{ font-size:10px; color:#9AA3B2; margin-top:5px; font-weight:600; }
+  .fmts{ display:flex; gap:10px; flex-wrap:wrap; margin-top:6px; }
+  .fmt{ background:#F7F8FB; border-radius:10px; padding:10px 14px; display:flex; align-items:center; justify-content:center; min-height:56px; }
+  .fmt img{ max-height:42px; max-width:200px; height:auto; }
+  .hr{ height:1px; background:#EEF1F6; margin:18px 0 14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>OxyGen — kit produits</h1>
+  <p class="sub">Pour chaque produit : le <b>logo principal</b> (atome-O « OxyGen » + nom dessous) en clair et sombre, l'icône d'app (avec / sans nom), et les formats alternatifs. Tout est en SVG + PNG dans le dossier du produit.</p>
+  <div id="list"></div>
+</div>
+<script>
+const P=[
+ {k:'care',nm:'OxyGen Care',hx:'#0F9D70',dot:'#12A074'},
+ {k:'edu',nm:'OxyGen Edu',hx:'#2F6FED',dot:'#3470EE'},
+ {k:'academy',nm:'OxyGen Clinic Academy',hx:'#6E4AE6',dot:'#7350EA'},
+ {k:'shift',nm:'OxyGen Shift',hx:'#E8663C',dot:'#ED6A3A'},
+];
+document.getElementById('list').innerHTML = P.map(p=>`
+ <div class="prod">
+   <div class="ph"><span class="dot" style="background:${p.dot}"></span><span class="nm">${p.nm}</span><span class="hx">accent ${p.hx}</span><span class="tag">logo principal</span></div>
+   <div class="main">
+     <div><div class="stage l"><img src="${p.k}/png/${p.k}-logo-principal-light-256h.png"></div></div>
+     <div><div class="stage d"><img src="${p.k}/png/${p.k}-logo-principal-dark-256h.png"></div></div>
+   </div>
+   <div class="strip">
+     <figure><img src="${p.k}/png/${p.k}-appicon-named-192.png" width="80" height="80"><figcaption>icône + nom</figcaption></figure>
+     <figure><img src="${p.k}/png/${p.k}-appicon-192.png" width="80" height="80"><figcaption>icône seule</figcaption></figure>
+     <figure><img src="${p.k}/png/${p.k}-appicon-named-120.png" width="48" height="48"><figcaption>120 px</figcaption></figure>
+   </div>
+   <div class="hr"></div>
+   <div class="cap">Formats alternatifs (clair)</div>
+   <div class="fmts">
+     <div class="fmt"><img src="${p.k}/png/${p.k}-logo-horizontal-light-128h.png"></div>
+     <div class="fmt"><img src="${p.k}/png/${p.k}-logo-twoline-light-128h.png"></div>
+     <div class="fmt"><img src="${p.k}/png/${p.k}-logo-stacked-light-128h.png"></div>
+   </div>
+ </div>`).join('');
+</script>
+</body>
+</html>

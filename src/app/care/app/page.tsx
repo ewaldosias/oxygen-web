@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Grain from '@/components/Grain'
 import { useEffect, useRef } from 'react'
 
 export default function CareLanding() {
@@ -83,7 +84,7 @@ export default function CareLanding() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(150deg, #065C50 0%, #0A7A6A 100%)',
+      background: 'radial-gradient(120% 90% at 50% 0%, #17A882 0%, #0E8A67 40%, #0A6149 70%, #063F30 100%)',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -94,9 +95,10 @@ export default function CareLanding() {
       position: 'relative',
       overflow: 'hidden'
     }}>
+      <Grain/>
 
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=DM+Sans:wght@300;400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
 
         @keyframes breathe {
           0%, 100% { transform: scale(1);    filter: drop-shadow(0 0 0px  rgba(212,168,67,0)); }
@@ -135,26 +137,24 @@ export default function CareLanding() {
         {/* Bohr logo — breathing */}
         <div className="bohr-anim fade-1" style={{ marginBottom: '24px', display: 'inline-block' }}>
           <svg width="88" height="88" viewBox="0 0 160 160" fill="none">
-            <g transform="rotate(-20, 80, 80)">
-              <ellipse cx="80" cy="80" rx="68" ry="48" fill="none" stroke="#D4A843" strokeWidth="1.6"/>
-              <circle cx="148" cy="80"  r="6" fill="white"/>
-              <circle cx="114" cy="121" r="6" fill="white"/>
-              <circle cx="46"  cy="121" r="6" fill="white"/>
-              <circle cx="12"  cy="80"  r="6" fill="white"/>
-              <circle cx="46"  cy="39"  r="6" fill="white"/>
-              <circle cx="114" cy="39"  r="6" fill="white"/>
-            </g>
-            <circle cx="80" cy="80" r="36" fill="none" stroke="#D4A843" strokeWidth="1.6"/>
-            <circle cx="80" cy="44"  r="6" fill="white"/>
-            <circle cx="80" cy="116" r="6" fill="white"/>
-            <circle cx="80" cy="80"  r="18" fill="white"/>
+            <defs>
+              <radialGradient id="appNuc1" cx="35%" cy="30%" r="75%">
+                <stop offset="0%" stopColor="#FCEFC6"/><stop offset="45%" stopColor="#E6BC58"/><stop offset="100%" stopColor="#B6852A"/>
+              </radialGradient>
+            </defs>
+            <circle cx="80" cy="80" r="64" fill="none" stroke="#fff" strokeWidth="4"/>
+            <circle cx="80" cy="80" r="33" fill="none" stroke="#fff" strokeWidth="3.5"/>
+            <circle cx="144" cy="80" r="7" fill="#fff"/><circle cx="112" cy="24.6" r="7" fill="#fff"/><circle cx="48" cy="24.6" r="7" fill="#fff"/><circle cx="16" cy="80" r="7" fill="#fff"/><circle cx="48" cy="135.4" r="7" fill="#fff"/><circle cx="112" cy="135.4" r="7" fill="#fff"/>
+            <circle cx="80" cy="47" r="6.5" fill="#fff"/><circle cx="80" cy="113" r="6.5" fill="#fff"/>
+            <circle cx="80" cy="80" r="17" fill="url(#appNuc1)"/>
+            <ellipse cx="74.6" cy="73.5" rx="7.1" ry="5.1" fill="#fff" opacity="0.5"/>
           </svg>
         </div>
 
         {/* Title */}
         <div className="fade-2">
           <h1 style={{
-            fontFamily: 'Cormorant Garamond, serif',
+            fontFamily: 'var(--font-manrope), Manrope, sans-serif',
             fontSize: '48px',
             fontWeight: 300,
             marginBottom: '6px',

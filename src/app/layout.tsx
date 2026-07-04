@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, DM_Sans } from "next/font/google";
+import { Cormorant_Garamond, DM_Sans, Manrope } from "next/font/google";
 import "./globals.css";
+import "./osite.css";
+import AtomDefs from "@/components/AtomDefs";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -15,15 +17,30 @@ const dmSans = DM_Sans({
   variable: "--font-dm-sans",
 });
 
+const manrope = Manrope({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-manrope",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "OxyGen Haïti — Former · Faciliter · Connecter",
-  description: "L'écosystème de santé numérique haïtien. Formation médicale, suivi des maladies chroniques, outils cliniques. Offline. En créole.",
+  title: "OxyGen Haïti — l'écosystème de santé numérique haïtien",
+  description:
+    "OxyGen Haïti : le premier écosystème de santé numérique haïtien. Suivi des maladies chroniques, préparation aux concours de médecine, formation continue. Hors ligne, du français au kreyòl.",
+  openGraph: {
+    title: "OxyGen Haïti — l'écosystème de santé numérique haïtien",
+    description: "Former, suivre et connecter — pensé pour les conditions réelles d'Haïti.",
+    type: "website",
+    images: ["/logo/png/appicon/oxygen-appicon-512.png"],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr">
-      <body className={`${cormorant.variable} ${dmSans.variable}`}>
+      <body className={`${cormorant.variable} ${dmSans.variable} ${manrope.variable}`}>
+        <AtomDefs />
         {children}
       </body>
     </html>

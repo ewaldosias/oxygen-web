@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OxyGen — Aperçu du kit logo</title>
+<style>
+  :root{ --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ font-family:var(--font); background:#ECEFF3; color:#16213A; -webkit-font-smoothing:antialiased; padding:40px 24px 64px; }
+  .wrap{ max-width:1040px; margin:0 auto; }
+  h1{ font-size:28px; font-weight:680; letter-spacing:-0.02em; text-align:center; }
+  .sub{ color:#5A6678; font-size:15px; margin:10px auto 28px; text-align:center; }
+  h2{ font-size:15px; font-weight:700; margin:28px 0 12px; color:#46506A; }
+  .duo{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  @media(max-width:640px){ .duo{ grid-template-columns:1fr; } }
+  .panel{ border-radius:18px; padding:34px 24px; display:flex; align-items:center; justify-content:center; min-height:130px; box-shadow:0 6px 18px rgba(16,28,55,.09); }
+  .light{ background:#FFFFFF; } .dark{ background:#0E1730; }
+  .panel img{ max-width:80%; height:auto; }
+  .row{ display:flex; align-items:center; gap:26px; flex-wrap:wrap; background:#fff; border-radius:14px; padding:20px 24px; box-shadow:0 6px 18px rgba(16,28,55,.08); }
+  .row.darkr{ background:#0E1730; }
+  .chip{ text-align:center; }
+  .chip img{ display:block; image-rendering:auto; }
+  .chip span{ display:block; font-size:11px; color:#9AA3B2; margin-top:7px; font-weight:600; }
+  .row.darkr .chip span{ color:#8595B5; }
+  .pal{ display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; }
+  .sw{ border-radius:12px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+  .sw .c{ height:54px; } .sw .l{ font-size:11px; padding:7px 9px; background:#fff; color:#46506A; font-weight:600; }
+  .note{ font-size:13px; color:#5A6678; background:#fff; border-radius:12px; padding:14px 18px; box-shadow:0 1px 3px rgba(0,0,0,.06); line-height:1.6; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>OxyGen — Kit logo</h1>
+  <p class="sub">Atome de Bohr · l'atome est le « O » · police Manrope · cœur or qui ne change jamais</p>
+
+  <h2>Logotype</h2>
+  <div class="duo">
+    <div class="panel light"><img src="png/logotype/oxygen-logotype-light-256h.png" alt="logotype clair"></div>
+    <div class="panel dark"><img src="png/logotype/oxygen-logotype-dark-256h.png" alt="logotype sombre"></div>
+  </div>
+
+  <h2>Atome seul (mark)</h2>
+  <div class="duo">
+    <div class="panel light"><img src="png/mark/oxygen-mark-light-256.png" style="max-width:120px" alt="mark clair"></div>
+    <div class="panel dark"><img src="png/mark/oxygen-mark-dark-256.png" style="max-width:120px" alt="mark sombre"></div>
+  </div>
+
+  <h2>Icône d'app & favicon</h2>
+  <div class="row">
+    <div class="chip"><img src="png/appicon/oxygen-appicon-192.png" width="92" height="92" alt="app icon"><span>App / PWA</span></div>
+    <div class="chip"><img src="png/appicon/oxygen-appicon-120.png" width="60" height="60" alt="app icon 120"><span>120 px</span></div>
+    <div class="chip"><img src="png/favicon/oxygen-favicon-48.png" width="48" height="48" alt="favicon 48"><span>favicon 48</span></div>
+    <div class="chip"><img src="png/favicon/oxygen-favicon-32.png" width="32" height="32" alt="favicon 32"><span>favicon 32</span></div>
+    <div class="chip"><img src="png/favicon/oxygen-favicon-16.png" width="16" height="16" alt="favicon 16"><span>favicon 16</span></div>
+  </div>
+
+  <h2>Palette</h2>
+  <div class="pal">
+    <div class="sw"><div class="c" style="background:#1B2A4A"></div><div class="l">Navy structure · #1B2A4A</div></div>
+    <div class="sw"><div class="c" style="background:#16213A"></div><div class="l">Navy encre · #16213A</div></div>
+    <div class="sw"><div class="c" style="background:#D4A843"></div><div class="l">Or accent · #D4A843</div></div>
+    <div class="sw"><div class="c" style="background:linear-gradient(135deg,#FCEFC6,#E6BC58,#B6852A)"></div><div class="l">Or noyau (dégradé)</div></div>
+    <div class="sw"><div class="c" style="background:linear-gradient(135deg,#21345C,#0E1730)"></div><div class="l">Fond sombre</div></div>
+  </div>
+
+  <h2>Police</h2>
+  <div class="note">Manrope — ExtraBold (800) pour le logotype, 600/700 pour l'interface. Le texte du logotype est vectorisé : aucune dépendance à la police pour l'afficher. Tous les fichiers sont dans <b>svg/</b> (vectoriel) et <b>png/</b> (transparent). Voir <b>README.md</b>.</div>
+</div>
+</body>
+</html>

@@ -1,8 +1,16 @@
 'use client'
 
+import Grain from '@/components/Grain'
+import { isPreview } from '@/lib/preview'
+
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
+import {
+  Square, Mic, Camera, ChartColumn, Stethoscope, Smartphone,
+  HeartPulse, ClipboardList, Baby, Eye, FlaskConical, Pill,
+  Calendar, CircleCheck, Microscope,
+} from 'lucide-react'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -84,13 +92,17 @@ function MicBtn({ value, set, speech }: { value:string; set:(v:string)=>void; sp
   return (
     <button onClick={toggle} style={{
       padding:'5px 10px', borderRadius:'8px', fontSize:'11px', fontWeight:700,
-      cursor:'pointer', fontFamily:'DM Sans, sans-serif', flexShrink:0,
+      cursor:'pointer', fontFamily:'var(--font-manrope), Manrope, sans-serif', flexShrink:0,
       background: speech.listening ? 'rgba(192,57,43,.1)' : 'rgba(10,122,106,.08)',
       border: `1px solid ${speech.listening ? 'rgba(192,57,43,.3)' : 'rgba(10,122,106,.2)'}`,
       color: speech.listening ? '#C0392B' : TEAL,
       animation: speech.listening ? 'pulse 1s ease-in-out infinite' : 'none',
     }}>
-      {speech.listening ? '⏹ Stop' : '🎤'}
+      {speech.listening ? (
+        <span style={{display:'inline-flex',alignItems:'center',gap:'4px'}}><Square size={13} strokeWidth={1.9}/>Stop</span>
+      ) : (
+        <Mic size={13} strokeWidth={1.9}/>
+      )}
     </button>
   )
 }
@@ -156,6 +168,7 @@ export default function DoctorPatientPage() {
   async function loadData() {
     setLoading(true)
     try {
+      if (isPreview()) { setLoading(false); return }
       const { data: dp } = await supabase
         .from('doctor_patients').select('*')
         .eq('id', patientRelId).single()
@@ -325,7 +338,7 @@ export default function DoctorPatientPage() {
 
   const inputStyle: React.CSSProperties = {
     width:'100%', border:'1.5px solid rgba(27,42,74,.15)', borderRadius:'12px',
-    padding:'10px 14px', fontSize:'14px', color:NAVY, fontFamily:'DM Sans, sans-serif',
+    padding:'10px 14px', fontSize:'14px', color:NAVY, fontFamily:'var(--font-manrope), Manrope, sans-serif',
     outline:'none', transition:'border-color .2s',
   }
   const numStyle: React.CSSProperties = {
@@ -345,16 +358,17 @@ export default function DoctorPatientPage() {
 
   function ScanBtn({ type, label }: { type:ScanType; label:string }) {
     return (
-      <button onClick={()=>openScan(type)} style={{display:'flex',alignItems:'center',gap:'5px',background:'rgba(10,122,106,.08)',border:'1px solid rgba(10,122,106,.2)',borderRadius:'10px',padding:'6px 12px',fontSize:'11px',fontWeight:700,color:TEAL,cursor:'pointer',fontFamily:'DM Sans, sans-serif',flexShrink:0}}>
-        📷 {label}
+      <button onClick={()=>openScan(type)} style={{display:'flex',alignItems:'center',gap:'5px',background:'rgba(10,122,106,.08)',border:'1px solid rgba(10,122,106,.2)',borderRadius:'10px',padding:'6px 12px',fontSize:'11px',fontWeight:700,color:TEAL,cursor:'pointer',fontFamily:'var(--font-manrope), Manrope, sans-serif',flexShrink:0}}>
+        <Camera size={13} strokeWidth={1.9}/> {label}
       </button>
     )
   }
 
   return (
-    <div style={{minHeight:'100vh',background:'#F0F4F9',fontFamily:'DM Sans, sans-serif',paddingBottom:'120px'}}>
+    <div style={{minHeight:'100vh',background:'radial-gradient(115% 78% at 50% -8%,#D6EBCE 0%,#E6F1DC 50%,#DBEBD1 100%)',fontFamily:'var(--font-manrope), Manrope, sans-serif',paddingBottom:'120px'}}>
+      <Grain/>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
         input:focus,textarea:focus{outline:2px solid ${TEAL}!important;outline-offset:1px;border-color:${TEAL}!important}
         input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
         @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
@@ -379,15 +393,15 @@ export default function DoctorPatientPage() {
             <svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M7 1L1 6.5L7 12" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>
           </button>
           <div style={{flex:1}}>
-            <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'11px',color:'rgba(255,255,255,.5)',marginBottom:'3px'}}>
+            <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'13px',fontWeight:700,color:'rgba(255,255,255,.6)',marginBottom:'4px'}}>
               Oxy<span style={{color:GOLD}}>Gen</span> Care · Doktè
             </div>
             {loading ? (
               <div style={{height:'24px',width:'160px',background:'rgba(255,255,255,.1)',borderRadius:'6px'}}/>
             ) : (
-              <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'22px',fontWeight:500,color:'white'}}>{patient?.name}</div>
+              <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'28px',fontWeight:800,letterSpacing:'-0.5px',color:'white'}}>{patient?.name}</div>
             )}
-            <div style={{fontSize:'11px',color:'rgba(255,255,255,.45)',marginTop:'2px'}}>
+            <div style={{fontSize:'12.5px',color:'rgba(255,255,255,.55)',marginTop:'3px'}}>
               {patient?.conditions?.join(' · ')} · {patient?.oxcId}
             </div>
           </div>
@@ -396,9 +410,9 @@ export default function DoctorPatientPage() {
 
         {/* Tab toggle */}
         <div style={{display:'flex',gap:'6px'}}>
-          {([['overview','📊 Apèsi'],['consult','🩺 Konsiltasyon']] as const).map(([key,label])=>(
-            <button key={key} className="tb" onClick={()=>setActiveTab(key)} style={{flex:1,padding:'9px',borderRadius:'12px',fontSize:'12px',fontWeight:700,fontFamily:'DM Sans, sans-serif',border:`1px solid ${activeTab===key?GOLD:'rgba(255,255,255,.15)'}`,background:activeTab===key?'rgba(212,168,67,.2)':'rgba(255,255,255,.08)',color:activeTab===key?GOLD:'rgba(255,255,255,.55)',transition:'all .2s'}}>
-              {label}
+          {([['overview',ChartColumn,'Apèsi'],['consult',Stethoscope,'Konsiltasyon']] as const).map(([key,Icon,label])=>(
+            <button key={key} className="tb" onClick={()=>setActiveTab(key)} style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'5px',flex:1,padding:'9px',borderRadius:'12px',fontSize:'12px',fontWeight:700,fontFamily:'var(--font-manrope), Manrope, sans-serif',border:`1px solid ${activeTab===key?GOLD:'rgba(255,255,255,.15)'}`,background:activeTab===key?'rgba(212,168,67,.2)':'rgba(255,255,255,.08)',color:activeTab===key?GOLD:'rgba(255,255,255,.55)',transition:'all .2s'}}>
+              <Icon size={14} strokeWidth={1.9}/> {label}
             </button>
           ))}
         </div>
@@ -441,7 +455,7 @@ export default function DoctorPatientPage() {
               </div>
             ) : (
               <div style={{background:'rgba(224,168,42,.06)',border:'1px solid rgba(224,168,42,.2)',borderRadius:'16px',padding:'16px',marginBottom:'12px',textAlign:'center'}}>
-                <div style={{fontSize:'20px',marginBottom:'6px'}}>📱</div>
+                <div style={{marginBottom:'6px',display:'flex',justifyContent:'center'}}><Smartphone size={20} strokeWidth={1.9} color="#8C6B00"/></div>
                 <div style={{fontSize:'13px',fontWeight:700,color:'#8C6B00'}}>Pako gen mezi — pasyan poko aktif</div>
               </div>
             )}
@@ -464,8 +478,8 @@ export default function DoctorPatientPage() {
               </div>
             )}
 
-            <button onClick={()=>setActiveTab('consult')} style={{width:'100%',background:TEAL,color:'white',border:'none',borderRadius:'16px',padding:'17px',fontSize:'15px',fontWeight:700,cursor:'pointer',fontFamily:'DM Sans, sans-serif',boxShadow:'0 6px 20px rgba(10,122,106,.3)'}}>
-              🩺 Kòmanse Konsiltasyon
+            <button onClick={()=>setActiveTab('consult')} style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',width:'100%',background:TEAL,color:'white',border:'none',borderRadius:'16px',padding:'17px',fontSize:'15px',fontWeight:700,cursor:'pointer',fontFamily:'var(--font-manrope), Manrope, sans-serif',boxShadow:'0 6px 20px rgba(10,122,106,.3)'}}>
+              <Stethoscope size={18} strokeWidth={1.9}/> Kòmanse Konsiltasyon
             </button>
           </>
         )}
@@ -475,7 +489,7 @@ export default function DoctorPatientPage() {
           <>
             {/* ── SCAN BUTTONS ── */}
             <div className="fu" style={{background:'white',borderRadius:'18px',border:'1px solid rgba(27,42,74,.07)',padding:'14px 16px',marginBottom:'12px',boxShadow:'0 1px 4px rgba(0,0,0,.04)'}}>
-              <div style={{fontSize:'10px',fontWeight:700,color:'#6B7A90',textTransform:'uppercase',letterSpacing:'1px',marginBottom:'10px'}}>📷 Skane dokiman</div>
+              <div style={{display:'flex',alignItems:'center',gap:'5px',fontSize:'10px',fontWeight:700,color:'#6B7A90',textTransform:'uppercase',letterSpacing:'1px',marginBottom:'10px'}}><Camera size={13} strokeWidth={1.9}/> Skane dokiman</div>
               <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px'}}>
                 <ScanBtn type="consultation" label="Fèy konsiltasyon"/>
                 <ScanBtn type="prescription" label="Òdonans"/>
@@ -487,7 +501,7 @@ export default function DoctorPatientPage() {
             {/* ── SIGNES VITAUX ── */}
             <div className="fu" style={{background:'white',borderRadius:'18px',border:'1px solid rgba(27,42,74,.07)',padding:'16px',marginBottom:'12px',boxShadow:'0 1px 4px rgba(0,0,0,.04)'}}>
               <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'10px'}}>
-                <div style={{fontSize:'10px',fontWeight:700,letterSpacing:'1.5px',color:'#6B7A90',textTransform:'uppercase'}}>❤ Siy Vital (Konsiltasyon)</div>
+                <div style={{display:'flex',alignItems:'center',gap:'5px',fontSize:'10px',fontWeight:700,letterSpacing:'1.5px',color:'#6B7A90',textTransform:'uppercase'}}><HeartPulse size={14} strokeWidth={1.9}/> Siy Vital (Konsiltasyon)</div>
                 <ScanBtn type="vital_signs" label="Skane"/>
               </div>
 
@@ -511,7 +525,7 @@ export default function DoctorPatientPage() {
 
             {/* ── ANAMNÈSE ── */}
             <div className="fu" style={{background:'white',borderRadius:'18px',border:'1px solid rgba(27,42,74,.07)',padding:'16px',marginBottom:'12px',boxShadow:'0 1px 4px rgba(0,0,0,.04)'}}>
-              <div style={{fontSize:'10px',fontWeight:700,letterSpacing:'1.5px',color:'#6B7A90',textTransform:'uppercase',marginBottom:'14px'}}>📋 Anamnèz</div>
+              <div style={{display:'flex',alignItems:'center',gap:'5px',fontSize:'10px',fontWeight:700,letterSpacing:'1.5px',color:'#6B7A90',textTransform:'uppercase',marginBottom:'14px'}}><ClipboardList size={14} strokeWidth={1.9}/> Anamnèz</div>
 
               {[
                 { label:'Istwa maladi (Motif konsiltasyon)', value:histoire,  set:setHistoire,  placeholder:'Pasyan vini pou... depi... li santi...' },
@@ -534,7 +548,7 @@ export default function DoctorPatientPage() {
             {/* ── OBSTÉTRIQUE ── */}
             {isObstetrique && (
               <div className="fu" style={{background:'white',borderRadius:'18px',border:'1px solid rgba(27,42,74,.07)',padding:'16px',marginBottom:'12px',boxShadow:'0 1px 4px rgba(0,0,0,.04)'}}>
-                <div style={{fontSize:'10px',fontWeight:700,letterSpacing:'1.5px',color:TEAL,textTransform:'uppercase',marginBottom:'10px'}}>🤰 Obstetrik</div>
+                <div style={{display:'flex',alignItems:'center',gap:'5px',fontSize:'10px',fontWeight:700,letterSpacing:'1.5px',color:TEAL,textTransform:'uppercase',marginBottom:'10px'}}><Baby size={14} strokeWidth={1.9}/> Obstetrik</div>
                 <NumRow label="Semèn gwosès" value={ageGest}   set={setAgeGest}   unit="sem"/>
                 <NumRow label="Wotè iteris"  value={hauteurUt} set={setHauteurUt} unit="cm"/>
                 <NumRow label="BDCF"         value={bdcf}      set={setBdcf}      unit="bpm"/>
@@ -542,7 +556,7 @@ export default function DoctorPatientPage() {
                   <div style={{fontSize:'13px',fontWeight:600,color:NAVY,marginBottom:'6px'}}>Pwoteyin pipi</div>
                   <div style={{display:'flex',gap:'6px'}}>
                     {['negatif','+','++','+++'].map(v=>(
-                      <button key={v} onClick={()=>setProteinuria(v)} style={{flex:1,padding:'7px',borderRadius:'8px',fontSize:'11px',fontWeight:700,cursor:'pointer',fontFamily:'DM Sans, sans-serif',border:`1px solid ${proteinuria===v?TEAL:'rgba(27,42,74,.15)'}`,background:proteinuria===v?TEAL:'white',color:proteinuria===v?'white':'#6B7A90',transition:'all .15s'}}>
+                      <button key={v} onClick={()=>setProteinuria(v)} style={{flex:1,padding:'7px',borderRadius:'8px',fontSize:'11px',fontWeight:700,cursor:'pointer',fontFamily:'var(--font-manrope), Manrope, sans-serif',border:`1px solid ${proteinuria===v?TEAL:'rgba(27,42,74,.15)'}`,background:proteinuria===v?TEAL:'white',color:proteinuria===v?'white':'#6B7A90',transition:'all .15s'}}>
                         {v}
                       </button>
                     ))}
@@ -554,7 +568,7 @@ export default function DoctorPatientPage() {
             {/* ── OPHTALMOLOGIE ── */}
             {isOphtalmo && (
               <div className="fu" style={{background:'white',borderRadius:'18px',border:'1px solid rgba(27,42,74,.07)',padding:'16px',marginBottom:'12px',boxShadow:'0 1px 4px rgba(0,0,0,.04)'}}>
-                <div style={{fontSize:'10px',fontWeight:700,letterSpacing:'1.5px',color:TEAL,textTransform:'uppercase',marginBottom:'10px'}}>👁️ Oftalmo</div>
+                <div style={{display:'flex',alignItems:'center',gap:'5px',fontSize:'10px',fontWeight:700,letterSpacing:'1.5px',color:TEAL,textTransform:'uppercase',marginBottom:'10px'}}><Eye size={14} strokeWidth={1.9}/> Oftalmo</div>
                 <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px',marginBottom:'8px'}}>
                   {[
                     { label:'OD san kòreksyon', value:acuiteOdSc, set:setAcuiteOdSc },
@@ -575,7 +589,7 @@ export default function DoctorPatientPage() {
 
             {/* ── EXAMEN + DIAGNOSTIC ── */}
             <div className="fu" style={{background:'white',borderRadius:'18px',border:'1px solid rgba(27,42,74,.07)',padding:'16px',marginBottom:'12px',boxShadow:'0 1px 4px rgba(0,0,0,.04)'}}>
-              <div style={{fontSize:'10px',fontWeight:700,letterSpacing:'1.5px',color:'#6B7A90',textTransform:'uppercase',marginBottom:'14px'}}>🔬 Egzamen ak Dyagnostik</div>
+              <div style={{display:'flex',alignItems:'center',gap:'5px',fontSize:'10px',fontWeight:700,letterSpacing:'1.5px',color:'#6B7A90',textTransform:'uppercase',marginBottom:'14px'}}><FlaskConical size={14} strokeWidth={1.9}/> Egzamen ak Dyagnostik</div>
               {[
                 { label:'Egzamen klinik', value:notes,      set:setNotes,      placeholder:'Obsèvasyon pandan konsiltasyon an...',rows:3 },
                 { label:'Dyagnostik',     value:diagnostic, set:setDiagnostic, placeholder:'Dyagnostik posé...',rows:2 },
@@ -594,7 +608,7 @@ export default function DoctorPatientPage() {
             {/* ── ORDONNANCE ── */}
             <div className="fu" style={{background:'white',borderRadius:'18px',border:'1px solid rgba(27,42,74,.07)',padding:'16px',marginBottom:'12px',boxShadow:'0 1px 4px rgba(0,0,0,.04)'}}>
               <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'10px'}}>
-                <div style={{fontSize:'10px',fontWeight:700,letterSpacing:'1.5px',color:'#6B7A90',textTransform:'uppercase'}}>💊 Òdonans</div>
+                <div style={{display:'flex',alignItems:'center',gap:'5px',fontSize:'10px',fontWeight:700,letterSpacing:'1.5px',color:'#6B7A90',textTransform:'uppercase'}}><Pill size={14} strokeWidth={1.9}/> Òdonans</div>
                 <ScanBtn type="prescription" label="Skane òdonans"/>
               </div>
               <textarea value={prescription} onChange={e=>setPrescription(e.target.value)}
@@ -604,14 +618,14 @@ export default function DoctorPatientPage() {
 
             {/* ── PROCHAIN RDV ── */}
             <div className="fu" style={{background:'white',borderRadius:'18px',border:'1px solid rgba(27,42,74,.07)',padding:'16px',marginBottom:'20px',boxShadow:'0 1px 4px rgba(0,0,0,.04)'}}>
-              <div style={{fontSize:'10px',fontWeight:700,letterSpacing:'1.5px',color:'#6B7A90',textTransform:'uppercase',marginBottom:'8px'}}>📅 Pwochen RDV</div>
+              <div style={{display:'flex',alignItems:'center',gap:'5px',fontSize:'10px',fontWeight:700,letterSpacing:'1.5px',color:'#6B7A90',textTransform:'uppercase',marginBottom:'8px'}}><Calendar size={14} strokeWidth={1.9}/> Pwochen RDV</div>
               <input type="date" value={nextAppt} onChange={e=>setNextAppt(e.target.value)} style={inputStyle}/>
             </div>
 
             {/* ── SAVE ── */}
             {consultStep === 'idle' && (
-              <button onClick={handleSave} style={{width:'100%',background:TEAL,color:'white',border:'none',borderRadius:'16px',padding:'17px',fontSize:'15px',fontWeight:700,cursor:'pointer',fontFamily:'DM Sans, sans-serif',boxShadow:'0 6px 20px rgba(10,122,106,.3)'}}>
-                ✓ Sovgade Konsiltasyon
+              <button onClick={handleSave} style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',width:'100%',background:TEAL,color:'white',border:'none',borderRadius:'16px',padding:'17px',fontSize:'15px',fontWeight:700,cursor:'pointer',fontFamily:'var(--font-manrope), Manrope, sans-serif',boxShadow:'0 6px 20px rgba(10,122,106,.3)'}}>
+                <CircleCheck size={18} strokeWidth={1.9}/> Sovgade Konsiltasyon
               </button>
             )}
             {consultStep === 'saving' && (
@@ -621,8 +635,8 @@ export default function DoctorPatientPage() {
             )}
             {consultStep === 'saved' && (
               <div style={{textAlign:'center',padding:'20px',background:'rgba(26,138,74,.06)',borderRadius:'16px',border:'1px solid rgba(26,138,74,.2)'}}>
-                <div style={{fontSize:'28px',marginBottom:'6px'}}>✅</div>
-                <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'18px',fontWeight:500,color:'#1A8A4A'}}>Konsiltasyon sovgade !</div>
+                <div style={{marginBottom:'6px',display:'flex',justifyContent:'center'}}><CircleCheck size={28} strokeWidth={1.9} color={TEAL}/></div>
+                <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'18px',fontWeight:700,color:'#1A8A4A'}}>Konsiltasyon sovgade !</div>
               </div>
             )}
           </>
@@ -638,8 +652,8 @@ export default function DoctorPatientPage() {
 
             {scanPending ? (
               <div style={{textAlign:'center',padding:'32px 0'}}>
-                <div className="spin" style={{fontSize:'40px',marginBottom:'16px'}}>🔬</div>
-                <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'22px',fontWeight:500,color:NAVY,marginBottom:'8px'}}>Claude ap analize imaj la...</div>
+                <div className="spin" style={{marginBottom:'16px'}}><Microscope size={40} strokeWidth={1.9} color={NAVY}/></div>
+                <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'22px',fontWeight:700,color:NAVY,marginBottom:'8px'}}>Claude ap analize imaj la...</div>
                 <div style={{fontSize:'13px',color:'#6B7A90'}}>Tanpri tann yon moman</div>
               </div>
             ) : scanResult ? (
@@ -657,7 +671,7 @@ export default function DoctorPatientPage() {
                     {Math.round(scanResult.confidence*100)}% konfyans
                   </div>
                 </div>
-                <div style={{fontFamily:'Cormorant Garamond, serif',fontSize:'18px',fontWeight:500,color:NAVY,marginBottom:'10px'}}>
+                <div style={{fontFamily:'var(--font-manrope), Manrope, sans-serif',fontSize:'18px',fontWeight:700,color:NAVY,marginBottom:'10px'}}>
                   {scanResult.fields_count} valè jwenn
                 </div>
                 <div style={{background:'#F0F4F9',borderRadius:'12px',padding:'12px',marginBottom:'16px',maxHeight:'200px',overflowY:'auto'}}>
@@ -669,11 +683,11 @@ export default function DoctorPatientPage() {
                   ))}
                 </div>
                 <div style={{display:'flex',gap:'10px'}}>
-                  <button onClick={()=>setScanModal(false)} style={{flex:1,background:'rgba(27,42,74,.06)',color:NAVY,border:'1px solid rgba(27,42,74,.15)',borderRadius:'12px',padding:'13px',fontSize:'13px',fontWeight:600,cursor:'pointer',fontFamily:'DM Sans, sans-serif'}}>
+                  <button onClick={()=>setScanModal(false)} style={{flex:1,background:'rgba(27,42,74,.06)',color:NAVY,border:'1px solid rgba(27,42,74,.15)',borderRadius:'12px',padding:'13px',fontSize:'13px',fontWeight:600,cursor:'pointer',fontFamily:'var(--font-manrope), Manrope, sans-serif'}}>
                     Ignore
                   </button>
-                  <button onClick={applyScan} style={{flex:2,background:TEAL,color:'white',border:'none',borderRadius:'12px',padding:'13px',fontSize:'13px',fontWeight:700,cursor:'pointer',fontFamily:'DM Sans, sans-serif',boxShadow:'0 4px 14px rgba(10,122,106,.3)'}}>
-                    ✓ Aplike valè yo
+                  <button onClick={applyScan} style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'6px',flex:2,background:TEAL,color:'white',border:'none',borderRadius:'12px',padding:'13px',fontSize:'13px',fontWeight:700,cursor:'pointer',fontFamily:'var(--font-manrope), Manrope, sans-serif',boxShadow:'0 4px 14px rgba(10,122,106,.3)'}}>
+                    <CircleCheck size={15} strokeWidth={1.9}/> Aplike valè yo
                   </button>
                 </div>
               </>
